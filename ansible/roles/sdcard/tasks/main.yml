@@ -1,0 +1,57 @@
+# Una SD aguanta un número limitado de escrituras. Aquí quitamos las que no
+# aportan nada. Por qué y qué perdemos: docs/02-sistema-operativo/05-cuidar-la-sd.md
+
+- name: Crear el directorio de configuración de journald
+  ansible.builtin.file:
+    path: /etc/systemd/journald.conf.d
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Guardar los logs de journald en RAM
+  ansible.builtin.copy:
+    dest: /etc/systemd/journald.conf.d/10-homelab.conf
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      # Gestionado por Ansible (rpi-k3s-homelab, rol sdcard)
+      [Journal]
+      Storage=volatile
+      RuntimeMaxUse={{ sdcard_journald_runtime_max }}
+  notify: Reiniciar journald
+
+- name: Localizar el punto de montaje raíz
+  ansible.builtin.set_fact:
+    sdcard_root_mount: "{{ ansible_mounts | selectattr('mount', 'equalto', '/') | first }}"
+
+# Raspberry Pi OS ya monta / con noatime; esto solo actúa si no fuese así.
+- name: Montar / con noatime (no escribir la fecha de cada lectura)
+  ansible.posix.mount:
+    path: /
+    src: "{{ sdcard_root_mount.device }}"
+    fstype: "{{ sdcard_root_mount.fstype }}"
+    opts: "{{ sdcard_root_mount.options }},noatime"
+    state: present
+  when: "'noatime' not in sdcard_root_mount.options"
+  notify: Reiniciar nodo
+
+- name: Comprobar si /tmp ya está en RAM
+  ansible.builtin.set_fact:
+    sdcard_tmp_is_tmpfs: >-
+      {{ ansible_mounts | selectattr('mount', 'equalto', '/tmp')
+         | selectattr('fstype', 'equalto', 'tmpfs') | list | length > 0 }}
+
+# Trixie ya monta /tmp en RAM por defecto; en Bookworm lo añadimos.
+- name: Montar /tmp en RAM
+  ansible.posix.mount:
+    path: /tmp
+    src: tmpfs
+    fstype: tmpfs
+    opts: "defaults,noatime,nosuid,nodev,mode=1777,size={{ sdcard_tmp_size }}"
+    state: present
+  when:
+    - sdcard_tmp_in_ram | bool
+    - not sdcard_tmp_is_tmpfs
+  notify: Reiniciar nodo

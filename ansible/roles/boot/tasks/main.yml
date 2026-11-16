@@ -1,0 +1,24 @@
+# Los cambios de este rol solo surten efecto tras reiniciar; por eso es el
+# último rol del playbook y avisa al handler "Reiniciar nodo".
+
+- name: Añadir parámetros de cgroups a cmdline.txt
+  # cmdline.txt es UNA sola línea. La expresión regular solo coincide si el
+  # parámetro aún no está, así que ejecutarlo dos veces no lo duplica.
+  ansible.builtin.lineinfile:
+    path: "{{ rpi_boot_dir }}/cmdline.txt"
+    regexp: '^((?!.*\b{{ item | regex_escape }}\b).*)$'
+    line: '\1 {{ item }}'
+    backrefs: true
+  loop: "{{ boot_cmdline_flags }}"
+  notify: Reiniciar nodo
+
+- name: Añadir el bloque de rpi-k3s-homelab a config.txt
+  # blockinfile delimita el bloque con marcas: puedes ver exactamente qué
+  # añadió Ansible y borrarlo a mano si un día quieres deshacerlo.
+  ansible.builtin.blockinfile:
+    path: "{{ rpi_boot_dir }}/config.txt"
+    marker: "# {mark} rpi-k3s-homelab (gestionado por Ansible)"
+    block: "{{ lookup('ansible.builtin.template', 'config.txt.block.j2') }}"
+    insertafter: EOF
+    backup: true
+  notify: Reiniciar nodo

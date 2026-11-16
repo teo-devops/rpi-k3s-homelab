@@ -1,0 +1,32 @@
+# Variables comunes a todos los nodos.
+# Cada variable está explicada en docs/referencia/variables.md
+
+# --- Acceso ---
+# Usuario que creaste con Raspberry Pi Imager al flashear la SD.
+ansible_user: homelab
+# Clave pública que se instalará en los nodos (la misma que pusiste en Imager).
+homelab_ssh_public_key_file: "~/.ssh/id_ed25519.pub"
+
+# --- Sistema ---
+homelab_timezone: Europe/Madrid
+# Actualizar todos los paquetes en cada ejecución de prepare (recomendado la primera vez).
+base_upgrade_packages: true
+
+# --- Dominio (fase 5) ---
+# Placeholder hasta que tengas un dominio en Cloudflare: docs/09-exposicion-y-seguridad/
+homelab_domain: example.com
+
+# --- Red ---
+# Por defecto la IP fija la da el router (reserva DHCP). Ver docs/03-red/
+network_static_enabled: false
+# Rango de IPs para servicios LoadBalancer (Cilium LB-IPAM, fase 2).
+# Debe quedar FUERA del rango DHCP de tu router.
+homelab_lb_ip_range: "192.168.1.200-192.168.1.220"
+
+# --- Tarjeta SD ---
+# Reduce escrituras para alargar la vida de la SD. Ver docs/02-sistema-operativo/05-cuidar-la-sd.md
+sdcard_protection_enabled: true
+
+# --- NVMe (futuro) ---
+# Se activa por nodo en host_vars cuando montes el disco. Ver docs/01-hardware/05-sd-vs-nvme.md
+nvme_enabled: false

@@ -1,0 +1,40 @@
+- name: Comprobar que tu clave pública existe en este ordenador
+  ansible.builtin.stat:
+    path: "{{ ssh_public_key_file | expanduser }}"
+  delegate_to: localhost
+  become: false
+  register: ssh_local_key
+
+- name: Parar si no hay clave pública
+  ansible.builtin.assert:
+    that: ssh_local_key.stat.exists
+    fail_msg: >-
+      No encuentro {{ ssh_public_key_file }}. Crea una con `ssh-keygen -t ed25519`
+      o cambia homelab_ssh_public_key_file en inventory/group_vars/all.yml.
+    quiet: true
+
+- name: Instalar tu clave pública en el usuario del nodo
+  ansible.posix.authorized_key:
+    user: "{{ ansible_user }}"
+    key: "{{ lookup('ansible.builtin.file', ssh_public_key_file | expanduser) }}"
+    state: present
+
+# Un fichero en sshd_config.d/ se suma a la configuración por defecto sin
+# tocar el fichero original: si lo borras, vuelves al estado de fábrica.
+- name: Endurecer SSH (sin root, sin contraseñas)
+  ansible.builtin.copy:
+    dest: /etc/ssh/sshd_config.d/10-homelab.conf
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      # Gestionado por Ansible (rpi-k3s-homelab, rol ssh)
+      PermitRootLogin no
+      {% if ssh_disable_password_auth %}
+      PasswordAuthentication no
+      KbdInteractiveAuthentication no
+      {% endif %}
+      PubkeyAuthentication yes
+  notify:
+    - Validar configuración de sshd
+    - Reiniciar sshd

@@ -1,0 +1,24 @@
+# Seguridad: solo fijamos como estática la IP por la que Ansible ya está
+# conectado. Cambiar la IP en caliente cortaría la conexión a mitad del playbook.
+- name: Comprobar que la IP estática coincide con ansible_host
+  ansible.builtin.assert:
+    that:
+      - network_ipv4_address | length > 0
+      - (network_ipv4_address | split('/') | first) == ansible_host
+    fail_msg: >-
+      network_ipv4_address ({{ network_ipv4_address }}) debe ser la IP actual del nodo
+      ({{ ansible_host }}) con su máscara, p. ej. {{ ansible_host }}/24.
+    quiet: true
+
+- name: Configurar IP estática con NetworkManager
+  community.general.nmcli:
+    conn_name: "{{ network_connection_name }}"
+    ifname: "{{ network_interface }}"
+    type: ethernet
+    ip4: "{{ network_ipv4_address }}"
+    gw4: "{{ network_ipv4_gateway }}"
+    dns4: "{{ network_dns_servers }}"
+    method4: manual
+    autoconnect: true
+    state: present
+  notify: Reiniciar nodo

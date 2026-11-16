@@ -1,0 +1,28 @@
+# Inventario real (IPs de tu red): se crea con `make init` a partir del ejemplo
+ansible/inventory/hosts.yml
+
+# Secretos y credenciales
+*.key
+*.pem
+*.agekey
+age.agekey
+kubeconfig
+*.kubeconfig
+.env
+*.tfvars
+!*.tfvars.example
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+.terraform.lock.hcl
+
+# Ansible
+*.retry
+.ansible/
+
+# Editores y SO
+.vscode/
+.idea/
+.DS_Store

@@ -1,0 +1,16 @@
+# Parámetros que se añaden a cmdline.txt (la línea de arranque del kernel).
+# El kernel de Raspberry Pi trae el controlador de memoria de cgroups apagado;
+# sin él, el kubelet no puede limitar la memoria de los pods.
+boot_cmdline_flags:
+  - cgroup_enable=memory
+  - cgroup_memory=1
+
+# Pi 5: usar el kernel de páginas de 4 KB en lugar del de 16 KB por defecto.
+# Necesario para Cilium/eBPF y para algunas imágenes de contenedor.
+boot_pi5_force_4k_kernel: true
+
+# Ajustes para nodos sin pantalla: liberan algo de memoria y recursos.
+boot_headless_tweaks: true
+
+# PCIe Gen 3 en la Pi 5 (oficialmente no certificado, pero estable con la mayoría de NVMe).
+boot_pcie_gen3: true

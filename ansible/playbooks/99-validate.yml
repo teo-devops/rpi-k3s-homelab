@@ -1,0 +1,89 @@
+# Comprueba que cada nodo cumple lo necesario para K3s + Cilium.
+# No cambia nada: solo lee y compara. Se puede lanzar tantas veces como quieras.
+#
+# Uso:  make validate
+# Guía: docs/04-ansible/05-validar.md
+- name: Validar que los nodos están listos
+  hosts: homelab
+  become: true
+  gather_facts: true
+
+  roles:
+    - role: rpi
+
+  tasks:
+    - name: Leer el tamaño de página de memoria del kernel
+      ansible.builtin.command: getconf PAGESIZE
+      register: validate_pagesize
+      changed_when: false
+
+    - name: Leer los controladores de cgroup v2 disponibles
+      ansible.builtin.slurp:
+        src: /sys/fs/cgroup/cgroup.controllers
+      register: validate_cgroups
+
+    - name: Leer ip_forward
+      ansible.builtin.slurp:
+        src: /proc/sys/net/ipv4/ip_forward
+      register: validate_ip_forward
+
+    - name: Comprobar soporte de overlayfs
+      ansible.builtin.command: grep -qw overlay /proc/filesystems
+      register: validate_overlay
+      changed_when: false
+      failed_when: false
+
+    - name: Comprobar br_netfilter
+      ansible.builtin.stat:
+        path: /proc/sys/net/bridge/bridge-nf-call-iptables
+      register: validate_br_netfilter
+
+    - name: Comprobar BTF del kernel (lo usa Cilium/eBPF)
+      ansible.builtin.stat:
+        path: /sys/kernel/btf/vmlinux
+      register: validate_btf
+
+    - name: Comprobar sincronización horaria
+      ansible.builtin.command: timedatectl show -p NTPSynchronized --value
+      register: validate_ntp
+      changed_when: false
+      failed_when: false
+
+    - name: Requisitos obligatorios
+      ansible.builtin.assert:
+        that:
+          - ansible_architecture == 'aarch64'
+          - validate_pagesize.stdout | trim == '4096'
+          - "'memory' in (validate_cgroups.content | b64decode)"
+          - ansible_swaptotal_mb | int == 0
+          - (validate_ip_forward.content | b64decode | trim) == '1'
+          - validate_overlay.rc == 0
+          - validate_br_netfilter.stat.exists
+        fail_msg: >-
+          {{ inventory_hostname }} NO está listo. Busca qué condición falló justo encima
+          y consulta docs/04-ansible/06-errores-comunes.md
+        success_msg: "{{ inventory_hostname }}: requisitos obligatorios OK"
+
+    - name: Aviso si falta BTF
+      ansible.builtin.debug:
+        msg: >-
+          AVISO: {{ inventory_hostname }} no expone /sys/kernel/btf/vmlinux. Cilium puede
+          funcionar, pero algunas funciones eBPF no. Ver docs/02-sistema-operativo/04-paginas-4k-y-btf.md
+      when: not validate_btf.stat.exists
+
+    - name: Aviso si la hora no está sincronizada
+      ansible.builtin.debug:
+        msg: >-
+          AVISO: {{ inventory_hostname }} no tiene la hora sincronizada. Los certificados TLS
+          y K3s fallan con relojes desfasados.
+      when: validate_ntp.stdout | trim != 'yes'
+
+    - name: Resumen
+      ansible.builtin.debug:
+        msg:
+          - "Nodo:      {{ inventory_hostname }} ({{ rpi_model }})"
+          - "RAM:       {{ ansible_memtotal_mb }} MB  | tier: {{ homelab_tier | default('sin definir') }}"
+          - "Kernel:    {{ ansible_kernel }}  | página: {{ validate_pagesize.stdout }} bytes"
+          - "Swap:      {{ ansible_swaptotal_mb }} MB"
+          - "BTF:       {{ 'sí' if validate_btf.stat.exists else 'no' }}"
+          - "Hora NTP:  {{ validate_ntp.stdout | default('desconocido') }}"

@@ -1,0 +1,59 @@
+- name: Exigir Raspberry Pi 5 (la Pi 4 no tiene PCIe accesible)
+  ansible.builtin.assert:
+    that: rpi_generation | int == 5
+    fail_msg: "nvme_enabled solo se admite en Raspberry Pi 5 ({{ inventory_hostname }} es {{ rpi_model }})."
+    quiet: true
+
+- name: Buscar el disco NVMe
+  ansible.builtin.stat:
+    path: "{{ nvme_device }}"
+  register: nvme_disk
+
+- name: Avisar si el disco no aparece (PCIe aún desactivado)
+  ansible.builtin.debug:
+    msg: >-
+      {{ nvme_device }} no existe todavía. Es normal la primera vez: el rol boot activa
+      PCIe en config.txt y el nodo se reinicia. Vuelve a lanzar `make prepare TAGS=nvme`.
+  when: not nvme_disk.stat.exists
+
+- name: Preparar y montar el NVMe
+  when: nvme_disk.stat.exists
+  block:
+    # Si K3s ya escribió datos en la SD, montar encima los "escondería".
+    - name: Comprobar si ya hay datos de K3s en la SD
+      ansible.builtin.find:
+        paths: "{{ nvme_mount_path }}"
+        file_type: any
+      register: nvme_existing_data
+
+    - name: Comprobar si ya está montado
+      ansible.builtin.set_fact:
+        nvme_is_mounted: "{{ ansible_mounts | selectattr('mount', 'equalto', nvme_mount_path) | list | length > 0 }}"
+
+    - name: Parar si montar ocultaría datos existentes
+      ansible.builtin.assert:
+        that: nvme_is_mounted or nvme_existing_data.matched == 0
+        fail_msg: >-
+          {{ nvme_mount_path }} ya tiene datos en la SD. Migración manual necesaria:
+          docs/08-almacenamiento/ (sección NVMe).
+        quiet: true
+
+    - name: Crear el sistema de ficheros (solo si el disco está vacío y lo autorizaste)
+      community.general.filesystem:
+        dev: "{{ nvme_device }}"
+        fstype: "{{ nvme_fstype }}"
+        force: false   # nunca reformatea un disco que ya tiene sistema de ficheros
+      when: nvme_format_confirm | bool
+
+    - name: Leer el UUID del disco
+      ansible.builtin.command: blkid -s UUID -o value {{ nvme_device }}
+      register: nvme_uuid
+      changed_when: false
+
+    - name: Montar el NVMe
+      ansible.posix.mount:
+        path: "{{ nvme_mount_path }}"
+        src: "UUID={{ nvme_uuid.stdout }}"
+        fstype: "{{ nvme_fstype }}"
+        opts: defaults,noatime
+        state: mounted

@@ -1,0 +1,4 @@
+# El kubelet históricamente exige no tener swap. Kubernetes ya soporta swap
+# (NodeSwap), pero K3s y Cilium se documentan y prueban sin ella: la quitamos.
+# Debate completo en docs/02-sistema-operativo/03-que-cambia-ansible.md
+swap_disabled: true

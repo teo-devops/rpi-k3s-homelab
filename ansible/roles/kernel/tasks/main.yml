@@ -1,0 +1,26 @@
+- name: Cargar los módulos en cada arranque
+  ansible.builtin.copy:
+    dest: /etc/modules-load.d/homelab.conf
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      # Gestionado por Ansible (rpi-k3s-homelab, rol kernel)
+      {% for module in kernel_modules %}
+      {{ module }}
+      {% endfor %}
+
+- name: Cargar los módulos ahora
+  community.general.modprobe:
+    name: "{{ item }}"
+    state: present
+  loop: "{{ kernel_modules }}"
+
+- name: Configurar sysctl
+  ansible.builtin.template:
+    src: 90-homelab.conf.j2
+    dest: /etc/sysctl.d/90-homelab.conf
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Aplicar sysctl

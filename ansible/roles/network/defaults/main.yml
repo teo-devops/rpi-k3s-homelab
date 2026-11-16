@@ -1,0 +1,11 @@
+# IP estática con NetworkManager. DESACTIVADO por defecto: lo recomendado es
+# una reserva DHCP en el router (docs/03-red/02-reserva-dhcp.md).
+#
+# Para usarlo, en host_vars/<nodo>.yml:
+#   network_static_enabled: true
+#   network_ipv4_address: 192.168.1.11/24   # debe coincidir con ansible_host
+network_interface: eth0
+network_connection_name: "homelab-{{ network_interface }}"
+network_ipv4_address: ""
+network_ipv4_gateway: "192.168.1.1"
+network_dns_servers: ["192.168.1.1"]

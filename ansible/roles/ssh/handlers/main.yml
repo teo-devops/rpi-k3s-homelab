@@ -1,0 +1,10 @@
+# Se ejecutan en este orden: primero validar, luego reiniciar. Si la
+# configuración tiene un error, sshd no se reinicia y no pierdes el acceso.
+- name: Validar configuración de sshd
+  ansible.builtin.command: sshd -t
+  changed_when: false
+
+- name: Reiniciar sshd
+  ansible.builtin.systemd_service:
+    name: ssh
+    state: restarted

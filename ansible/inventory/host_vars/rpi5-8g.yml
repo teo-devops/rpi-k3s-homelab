@@ -1,0 +1,9 @@
+# Raspberry Pi 5 — 8 GB. El nodo "grande": control plane y cargas con estado pesadas.
+homelab_tier: large
+
+# Reservas para el kubelet (las aplica la fase 2). Lo que reservas aquí no lo
+# pueden usar los pods: es el colchón del sistema operativo y de K3s.
+# Explicación: docs/01-hardware/03-presupuesto-de-memoria.md
+kubelet_system_reserved: "cpu=250m,memory=384Mi"
+kubelet_kube_reserved: "cpu=250m,memory=512Mi"   # más alto: aquí corre el API server
+kubelet_eviction_hard: "memory.available<256Mi"

@@ -1,0 +1,2 @@
+# Este rol no tiene variables configurables: solo descubre datos del hardware.
+rpi_supported_generations: [4, 5]

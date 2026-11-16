@@ -1,0 +1,6 @@
+# Raspberry Pi 5 — 4 GB. El nodo "mediano": ingress y aplicaciones generales.
+homelab_tier: medium
+
+kubelet_system_reserved: "cpu=200m,memory=256Mi"
+kubelet_kube_reserved: "cpu=200m,memory=256Mi"
+kubelet_eviction_hard: "memory.available<192Mi"

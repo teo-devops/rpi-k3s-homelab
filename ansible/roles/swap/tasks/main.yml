@@ -1,0 +1,36 @@
+- name: Recoger el estado de los servicios
+  ansible.builtin.service_facts:
+
+# Raspberry Pi OS Bookworm crea la swap con dphys-swapfile.
+- name: Desactivar dphys-swapfile (Bookworm)
+  ansible.builtin.systemd_service:
+    name: dphys-swapfile
+    enabled: false
+    state: stopped
+  when:
+    - swap_disabled | bool
+    - "'dphys-swapfile.service' in ansible_facts.services"
+
+# Raspberry Pi OS Trixie usa swap comprimida en RAM (zram) y en fichero,
+# gestionadas como unidades de systemd. Enmascarar swap.target evita que
+# cualquiera de ellas se active al arrancar.
+- name: Enmascarar swap.target (Trixie y posteriores)
+  ansible.builtin.systemd_service:
+    name: swap.target
+    masked: true
+  when: swap_disabled | bool
+  notify: Reiniciar nodo
+
+- name: Comentar entradas de swap en /etc/fstab
+  ansible.builtin.replace:
+    path: /etc/fstab
+    regexp: '^([^#\s]\S*\s+\S+\s+swap\s.*)$'
+    replace: '# \1  # desactivado por rpi-k3s-homelab'
+  when: swap_disabled | bool
+
+- name: Apagar la swap activa ahora mismo
+  ansible.builtin.command: swapoff -a
+  when:
+    - swap_disabled | bool
+    - ansible_swaptotal_mb | int > 0
+  changed_when: true

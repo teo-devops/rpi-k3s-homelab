@@ -1,0 +1,8 @@
+# Raspberry Pi 4 — 2 GB. El nodo "pequeño": solo cargas ligeras (cloudflared, exporters).
+homelab_tier: small
+
+# Con 2 GB cada MiB cuenta: reservas ajustadas y desalojo temprano para que el
+# nodo nunca llegue a quedarse sin memoria (sin swap, eso sería un cuelgue).
+kubelet_system_reserved: "cpu=150m,memory=192Mi"
+kubelet_kube_reserved: "cpu=150m,memory=160Mi"
+kubelet_eviction_hard: "memory.available<128Mi"

@@ -1,0 +1,41 @@
+# Descubre qué Raspberry Pi es y dónde está su partición de arranque.
+# Otros roles usan estos datos:
+#   rpi_model       -> "Raspberry Pi 5 Model B Rev 1.0"
+#   rpi_generation  -> 5 | 4 | 0 (desconocido)
+#   rpi_boot_dir    -> /boot/firmware (Bookworm y posteriores) o /boot (antiguo)
+
+- name: Exigir un sistema de 64 bits
+  ansible.builtin.assert:
+    that: ansible_architecture == 'aarch64'
+    fail_msg: >-
+      {{ inventory_hostname }} ejecuta {{ ansible_architecture }}. K3s y Cilium necesitan
+      Raspberry Pi OS Lite de 64 bits: vuelve a flashear la SD (docs/02-sistema-operativo/01-flashear-la-sd.md).
+    quiet: true
+
+- name: Leer el modelo de placa
+  ansible.builtin.slurp:
+    src: /proc/device-tree/model
+  register: rpi_model_raw
+
+- name: Calcular modelo y generación
+  ansible.builtin.set_fact:
+    # El fichero termina en un byte nulo: lo quitamos.
+    rpi_model: "{{ rpi_model_raw.content | b64decode | replace('\x00', '') | trim }}"
+    rpi_generation: >-
+      {{ 5 if 'Raspberry Pi 5' in (rpi_model_raw.content | b64decode)
+         else 4 if 'Raspberry Pi 4' in (rpi_model_raw.content | b64decode)
+         else 0 }}
+
+- name: Avisar si el modelo no es una Pi 4 o Pi 5
+  ansible.builtin.debug:
+    msg: "AVISO: {{ inventory_hostname }} es '{{ rpi_model }}'; este repo está probado en Pi 4 y Pi 5."
+  when: rpi_generation | int not in rpi_supported_generations
+
+- name: Buscar config.txt en /boot/firmware
+  ansible.builtin.stat:
+    path: /boot/firmware/config.txt
+  register: rpi_firmware_dir
+
+- name: Fijar la ruta de arranque
+  ansible.builtin.set_fact:
+    rpi_boot_dir: "{{ '/boot/firmware' if rpi_firmware_dir.stat.exists else '/boot' }}"

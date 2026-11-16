@@ -1,0 +1,65 @@
+# Fase 1 — Preparar las Raspberry Pi para K3s y Cilium.
+#
+# Qué hace (en orden):
+#   rpi       -> averigua modelo de Pi y dónde está la partición de arranque
+#   base      -> paquetes, hostname, zona horaria, hora por NTP
+#   ssh       -> instala tu clave y desactiva el acceso por contraseña
+#   swap      -> desactiva la swap (requisito clásico del kubelet)
+#   kernel    -> módulos y sysctl para contenedores y Cilium
+#   sdcard    -> menos escrituras en la SD (journald en RAM, noatime, /tmp en RAM)
+#   network   -> IP estática con NetworkManager (desactivado por defecto)
+#   nvme      -> monta un NVMe en /var/lib/rancher (desactivado por defecto)
+#   boot      -> cgroups en cmdline.txt, kernel de 4K en Pi 5, PCIe si hay NVMe
+#
+# Si algo requiere reinicio (cmdline.txt, config.txt, fstab), el nodo se
+# reinicia UNA vez al final, solo si hizo falta.
+#
+# Uso:  make prepare            (todos los nodos)
+#       make prepare TAGS=kernel LIMIT=rpi4-2g
+# Guía: docs/04-ansible/04-preparar-los-nodos.md
+- name: Preparar los nodos Raspberry Pi
+  hosts: homelab
+  become: true
+  # Los nodos se preparan de uno en uno: si algo falla, no rompes los tres a la vez.
+  serial: 1
+
+  roles:
+    - role: rpi
+      tags: [always]
+    - role: base
+      tags: [base]
+    - role: ssh
+      tags: [ssh]
+    - role: swap
+      tags: [swap]
+    - role: kernel
+      tags: [kernel]
+    - role: sdcard
+      tags: [sdcard]
+      when: sdcard_protection_enabled | bool
+    - role: network
+      tags: [network]
+      when: network_static_enabled | bool
+    - role: nvme
+      tags: [nvme]
+      when: nvme_enabled | bool
+    - role: boot
+      tags: [boot]
+
+  handlers:
+    # Cualquier rol puede pedir un reinicio con `notify: Reiniciar nodo`.
+    # Ansible lo ejecuta una sola vez, al final, aunque lo pidan varios roles.
+    - name: Reiniciar nodo
+      ansible.builtin.reboot:
+        msg: "Reinicio lanzado por rpi-k3s-homelab (cambios de arranque o fstab)"
+        reboot_timeout: 600
+        post_reboot_delay: 10
+
+  post_tasks:
+    - name: Resumen del nodo
+      ansible.builtin.debug:
+        msg: >-
+          {{ inventory_hostname }} listo: {{ rpi_model }},
+          {{ ansible_memtotal_mb }} MB de RAM, tier '{{ homelab_tier | default('sin definir') }}'.
+          Siguiente paso: make validate
+      tags: [always]

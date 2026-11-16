@@ -1,0 +1,19 @@
+[all]
+# Ajustes de rpi-k3s-homelab. Explicados en docs/02-sistema-operativo/
+{% if rpi_generation | int == 5 and boot_pi5_force_4k_kernel %}
+# Kernel con páginas de 4 KB (el de serie en Pi 5 usa 16 KB)
+kernel=kernel8.img
+{% endif %}
+{% if boot_headless_tweaks %}
+# Sin pantalla ni cámara ni audio
+dtparam=audio=off
+camera_auto_detect=0
+display_auto_detect=0
+{% endif %}
+{% if rpi_generation | int == 5 and nvme_enabled | default(false) %}
+# Puerto PCIe para el HAT NVMe
+dtparam=pciex1
+{% if boot_pcie_gen3 %}
+dtparam=pciex1_gen=3
+{% endif %}
+{% endif %}

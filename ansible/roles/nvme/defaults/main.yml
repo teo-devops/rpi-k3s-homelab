@@ -1,0 +1,10 @@
+# NVMe por PCIe en la Raspberry Pi 5. DESACTIVADO por defecto.
+# Activación en host_vars/<nodo>.yml (solo Pi 5):
+#   nvme_enabled: true
+#   nvme_format_confirm: true      # SOLO la primera vez: autoriza formatear el disco
+nvme_device: /dev/nvme0n1
+nvme_fstype: ext4
+# Montamos todo /var/lib/rancher: imágenes de contenedor, base de datos de K3s
+# y volúmenes local-path pasan al NVMe. La SD queda solo para el sistema.
+nvme_mount_path: /var/lib/rancher
+nvme_format_confirm: false

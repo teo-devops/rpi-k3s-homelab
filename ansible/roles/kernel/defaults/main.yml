@@ -1,0 +1,15 @@
+# Módulos del kernel que se cargan en cada arranque.
+kernel_modules:
+  - overlay        # sistema de ficheros por capas de las imágenes de contenedor
+  - br_netfilter   # que el tráfico de bridges pase por netfilter
+
+# Parámetros del kernel (sysctl). Explicados en docs/02-sistema-operativo/03-que-cambia-ansible.md
+kernel_sysctl:
+  net.ipv4.ip_forward: 1                    # el nodo debe enrutar tráfico entre pods
+  net.ipv6.conf.all.forwarding: 1
+  net.bridge.bridge-nf-call-iptables: 1
+  net.bridge.bridge-nf-call-ip6tables: 1
+  fs.inotify.max_user_instances: 512        # muchos pods vigilan ficheros (Prometheus, Flux...)
+  fs.inotify.max_user_watches: 524288
+  vm.panic_on_oom: 0
+  kernel.panic: 10                          # si el kernel entra en pánico, reinicia a los 10 s

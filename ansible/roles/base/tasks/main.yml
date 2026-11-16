@@ -1,0 +1,37 @@
+- name: Actualizar la caché de apt
+  ansible.builtin.apt:
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: Actualizar el sistema
+  ansible.builtin.apt:
+    upgrade: full
+  when: base_upgrade_packages | bool
+  notify: Reiniciar nodo   # un kernel nuevo solo se usa tras reiniciar
+
+- name: Instalar paquetes base
+  ansible.builtin.apt:
+    name: "{{ base_packages }}"
+    state: present
+
+- name: Fijar el hostname igual al nombre del inventario
+  ansible.builtin.hostname:
+    name: "{{ inventory_hostname }}"
+
+- name: Resolver el propio hostname localmente
+  ansible.builtin.lineinfile:
+    path: /etc/hosts
+    regexp: '^127\.0\.1\.1\s'
+    line: "127.0.1.1 {{ inventory_hostname }}"
+
+- name: Fijar la zona horaria
+  community.general.timezone:
+    name: "{{ base_timezone }}"
+
+# K3s y los certificados TLS necesitan la hora bien puesta. Las Pi no tienen
+# reloj con batería: al arrancar, la hora viene de internet por NTP.
+- name: Activar la sincronización horaria (systemd-timesyncd)
+  ansible.builtin.systemd_service:
+    name: systemd-timesyncd
+    enabled: true
+    state: started

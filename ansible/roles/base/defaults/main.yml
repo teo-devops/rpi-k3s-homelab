@@ -1,0 +1,16 @@
+# Paquetes que se instalan en todos los nodos.
+base_packages:
+  - curl             # descargar el instalador de K3s
+  - ca-certificates
+  - jq               # leer JSON en scripts
+  - htop             # ver consumo de CPU y memoria
+  - iotop            # ver quién escribe en la SD
+  - git
+  - rsync
+  - nfs-common       # por si montas un NAS más adelante
+  - open-iscsi       # lo necesitaría Longhorn (futuro, con NVMe)
+
+# Actualizar todo el sistema (apt full-upgrade) en cada ejecución.
+base_upgrade_packages: true
+
+base_timezone: "{{ homelab_timezone | default('Europe/Madrid') }}"

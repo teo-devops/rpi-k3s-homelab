@@ -1,0 +1,5 @@
+# Límite de RAM para los logs del sistema (se pierden al reiniciar).
+sdcard_journald_runtime_max: "64M"
+# /tmp en RAM. Tamaño máximo; solo ocupa memoria lo que realmente se escribe.
+sdcard_tmp_in_ram: true
+sdcard_tmp_size: "256M"

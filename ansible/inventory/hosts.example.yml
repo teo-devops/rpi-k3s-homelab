@@ -1,0 +1,22 @@
+# Inventario de ejemplo. Copia este fichero a hosts.yml (`make init`) y pon
+# las IPs reales de tus nodos. hosts.yml está en .gitignore: tus IPs no se suben.
+#
+# Grupos:
+#   k3s_server -> el nodo que llevará el control plane (la Pi con más RAM)
+#   k3s_agents -> los nodos que solo ejecutan cargas
+#   homelab    -> todos (lo usan los playbooks)
+#
+# Las características de cada nodo (tier, reservas de memoria...) viven en
+# inventory/host_vars/<nombre>.yml, para que este fichero sea solo "dónde está cada uno".
+homelab:
+  children:
+    k3s_server:
+      hosts:
+        rpi5-8g:
+          ansible_host: 192.168.1.11
+    k3s_agents:
+      hosts:
+        rpi5-4g:
+          ansible_host: 192.168.1.12
+        rpi4-2g:
+          ansible_host: 192.168.1.13
