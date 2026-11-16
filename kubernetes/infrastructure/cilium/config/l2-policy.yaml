@@ -1,0 +1,12 @@
+# Cómo se anuncian esas IPs en la red de casa: un nodo responde a las
+# peticiones ARP de cada IP ("¿quién tiene 192.168.1.200?"). Si ese nodo cae,
+# otro toma el relevo en unos segundos.
+apiVersion: cilium.io/v2alpha1
+kind: CiliumL2AnnouncementPolicy
+metadata:
+  name: homelab-lan
+spec:
+  loadBalancerIPs: true
+  externalIPs: false
+  interfaces:
+    - ^eth[0-9]+   # solo por cable; nunca por Wi-Fi ni por interfaces de pods

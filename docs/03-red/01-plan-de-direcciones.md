@@ -33,8 +33,9 @@ que Cilium ha dado a un servicio, habrá dos equipos con la misma IP y fallos in
    | Services | `10.43.0.0/16` | Interno |
 
 3. Si tu red de casa ya usa `10.42.x.x` o `10.43.x.x` (raro), cambia los rangos internos en la fase 2.
-4. Pon tu rango de LoadBalancer en `homelab_lb_ip_range`
-   ([`group_vars/all.yml`](../../ansible/inventory/group_vars/all.yml)).
+4. Pon tu rango de LoadBalancer en
+   [`kubernetes/infrastructure/cilium/config/lb-ippool.yaml`](../../kubernetes/infrastructure/cilium/config/lb-ippool.yaml).
+   Lo usa Cilium a partir de la fase 2.
 
 ## Errores comunes
 

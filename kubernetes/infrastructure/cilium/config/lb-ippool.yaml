@@ -1,0 +1,11 @@
+# IPs que Cilium puede dar a los Services de tipo LoadBalancer.
+# CAMBIA el rango por uno de TU red que quede FUERA del DHCP del router.
+# Ver docs/03-red/01-plan-de-direcciones.md
+apiVersion: cilium.io/v2
+kind: CiliumLoadBalancerIPPool
+metadata:
+  name: homelab-lan
+spec:
+  blocks:
+    - start: 192.168.1.200
+      stop: 192.168.1.220

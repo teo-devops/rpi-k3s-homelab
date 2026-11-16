@@ -2,7 +2,8 @@
 
 Todo lo que corre **dentro** del clúster. Flux lo aplica desde esta carpeta (fase 3).
 
-> **Pendiente: fases 2 a 7.** Aquí está la estructura prevista; las carpetas se crean con el código de cada fase.
+> Hecho: `infrastructure/cilium/` (fase 2, instalado con `make cilium`) y `examples/`.
+> El resto se crea con el código de cada fase. Hasta la fase 3, nada de esto lo aplica Flux.
 
 ```
 kubernetes/
@@ -15,7 +16,8 @@ kubernetes/
 │   ├── traefik/               # fase 5: ingress interno
 │   ├── cloudflared/           # fase 5: Cloudflare Tunnel
 │   └── monitoring/            # fase 6: kube-prometheus-stack
-└── apps/                      # tus servicios
+├── apps/                      # tus servicios
+└── examples/                  # manifiestos para experimentar con la guía (no son plataforma)
 ```
 
 Orden de dependencias: `cilium` → `cert-manager` → `traefik` → resto. Flux lo garantiza con `dependsOn`.

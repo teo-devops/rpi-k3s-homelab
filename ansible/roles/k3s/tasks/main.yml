@@ -1,0 +1,81 @@
+- name: Comprobar el rol del nodo y sus variables
+  ansible.builtin.assert:
+    that:
+      - k3s_role in ['server', 'agent']
+      - homelab_tier is defined
+      - kubelet_system_reserved is defined
+    fail_msg: >-
+      {{ inventory_hostname }}: falta k3s_role o las variables de host_vars
+      (homelab_tier, kubelet_*). Ver docs/04-ansible/02-inventario-y-variables.md
+    quiet: true
+
+- name: Leer la versión de K3s instalada
+  ansible.builtin.command: /usr/local/bin/k3s --version
+  register: k3s_installed
+  changed_when: false
+  failed_when: false
+
+- name: Decidir si hay que instalar o actualizar
+  ansible.builtin.set_fact:
+    k3s_needs_install: "{{ k3s_installed.rc != 0 or k3s_version not in k3s_installed.stdout }}"
+
+# Los agents necesitan el token del server. Se lee directamente del server en
+# cada ejecución: así no se guarda en ningún fichero del repo.
+- name: Leer el token de unión del server
+  ansible.builtin.slurp:
+    src: /var/lib/rancher/k3s/server/node-token
+  delegate_to: "{{ groups['k3s_server'][0] }}"
+  register: k3s_token_raw
+  no_log: true
+  when: k3s_role == 'agent'
+
+- name: Guardar el token para la plantilla
+  ansible.builtin.set_fact:
+    k3s_join_token: "{{ k3s_token_raw.content | b64decode | trim }}"
+  no_log: true
+  when: k3s_role == 'agent'
+
+- name: Crear el directorio de configuración
+  ansible.builtin.file:
+    path: "{{ k3s_config_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Escribir la configuración de K3s
+  ansible.builtin.template:
+    src: config.yaml.j2
+    dest: "{{ k3s_config_dir }}/config.yaml"
+    owner: root
+    group: root
+    mode: "0600"   # en los agents contiene el token
+  notify: Reiniciar K3s
+  no_log: "{{ k3s_role == 'agent' }}"
+
+- name: Descargar el instalador oficial de K3s
+  ansible.builtin.get_url:
+    url: "{{ k3s_install_script_url }}"
+    dest: /usr/local/bin/k3s-install.sh
+    owner: root
+    group: root
+    mode: "0755"
+  when: k3s_needs_install | bool
+
+- name: Instalar K3s {{ k3s_version }}
+  ansible.builtin.command: /usr/local/bin/k3s-install.sh
+  environment:
+    INSTALL_K3S_VERSION: "{{ k3s_version }}"
+    INSTALL_K3S_EXEC: "{{ k3s_role }}"
+  when: k3s_needs_install | bool
+  changed_when: true
+
+- name: Asegurar que el servicio está activo
+  ansible.builtin.systemd_service:
+    name: "{{ 'k3s' if k3s_role == 'server' else 'k3s-agent' }}"
+    enabled: true
+    state: started
+
+- name: Tareas del server
+  ansible.builtin.include_tasks: server.yml
+  when: k3s_role == 'server'

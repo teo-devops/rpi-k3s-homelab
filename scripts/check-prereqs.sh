@@ -46,10 +46,19 @@ if command -v ansible-galaxy >/dev/null 2>&1; then
 fi
 
 echo
+echo "Fase 2 — K3s y Cilium"
+optional kubectl "hablar con el clúster" "https://kubernetes.io/docs/tasks/tools/"
+optional helm "instalar Cilium" "https://helm.sh/docs/intro/install/"
+optional cilium "estado de Cilium y Hubble" "https://docs.cilium.io/en/stable/gettingstarted/k8s-install-default/#install-the-cilium-cli"
+optional hubble "consultar flujos de red" "https://docs.cilium.io/en/stable/observability/hubble/setup/#install-the-hubble-client"
+if [ -f "$HOME/.kube/rpi-k3s-homelab.yaml" ]; then
+  ok "kubeconfig ~/.kube/rpi-k3s-homelab.yaml"
+else
+  warn "kubeconfig ~/.kube/rpi-k3s-homelab.yaml (aún no hace falta). Lo crea: make k3s"
+fi
+
+echo
 echo "Fases siguientes"
-optional kubectl "fase 2, hablar con el clúster" "https://kubernetes.io/docs/tasks/tools/"
-optional helm "fase 2, instalar Cilium" "https://helm.sh/docs/intro/install/"
-optional cilium "fase 2, CLI de Cilium y Hubble" "https://docs.cilium.io/en/stable/gettingstarted/k8s-install-default/"
 optional flux "fase 3, GitOps" "https://fluxcd.io/flux/installation/"
 optional sops "fase 3, cifrar secretos" "https://github.com/getsops/sops/releases"
 optional age "fase 3, claves de cifrado" "paquete age"

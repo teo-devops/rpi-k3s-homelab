@@ -19,9 +19,15 @@ homelab_domain: example.com
 # --- Red ---
 # Por defecto la IP fija la da el router (reserva DHCP). Ver docs/03-red/
 network_static_enabled: false
-# Rango de IPs para servicios LoadBalancer (Cilium LB-IPAM, fase 2).
-# Debe quedar FUERA del rango DHCP de tu router.
-homelab_lb_ip_range: "192.168.1.200-192.168.1.220"
+# El rango de IPs para servicios LoadBalancer NO está aquí: es configuración de
+# Cilium y vive en kubernetes/infrastructure/cilium/config/lb-ippool.yaml
+
+# --- K3s (fase 2) ---
+# Versión fijada. Cilium 1.20 está probado con Kubernetes 1.33-1.36: no subir a
+# 1.37 hasta que Cilium lo soporte. Ver docs/05-kubernetes-k3s/03-instalar.md
+k3s_version: v1.36.6+k3s1
+# Dónde se guarda el kubeconfig en TU portátil. Fichero propio: no toca ~/.kube/config.
+k3s_kubeconfig_local: "~/.kube/rpi-k3s-homelab.yaml"
 
 # --- Tarjeta SD ---
 # Reduce escrituras para alargar la vida de la SD. Ver docs/02-sistema-operativo/05-cuidar-la-sd.md

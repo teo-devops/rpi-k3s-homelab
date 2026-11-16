@@ -1,0 +1,68 @@
+# Dos Deployments que muestran cómo se reparte la carga por memoria.
+# Guía: docs/05-kubernetes-k3s/05-scheduling-por-memoria.md
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: demo
+---
+# "Pesado": exige un nodo large. Si no hay sitio allí, se queda Pending
+# en vez de caer en la Pi de 2 GB.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pesado
+  namespace: demo
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: pesado }
+  template:
+    metadata:
+      labels: { app: pesado }
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: homelab.io/tier
+                    operator: In
+                    values: [large]
+      containers:
+        - name: app
+          image: busybox:1.37
+          command: ["sleep", "infinity"]
+          resources:
+            requests: { cpu: 50m, memory: 512Mi }
+            limits: { memory: 512Mi }
+---
+# "Ligero": sin afinidad. 3 réplicas que el scheduler reparte libremente
+# (las anti-afinidades suaves las separan entre nodos si puede).
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ligero
+  namespace: demo
+spec:
+  replicas: 3
+  selector:
+    matchLabels: { app: ligero }
+  template:
+    metadata:
+      labels: { app: ligero }
+    spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                topologyKey: kubernetes.io/hostname
+                labelSelector:
+                  matchLabels: { app: ligero }
+      containers:
+        - name: app
+          image: busybox:1.37
+          command: ["sleep", "infinity"]
+          resources:
+            requests: { cpu: 10m, memory: 16Mi }
+            limits: { memory: 32Mi }

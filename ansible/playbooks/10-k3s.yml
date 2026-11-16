@@ -1,0 +1,61 @@
+# Fase 2 — Instalar K3s: un server y dos agents, SIN red de pods.
+#
+# Al terminar, los nodos aparecen como NotReady. Es lo esperado: falta el CNI,
+# que instalas a continuación con `make cilium`.
+#
+# Uso:  make k3s
+# Guía: docs/05-kubernetes-k3s/03-instalar.md
+
+- name: Instalar el server (control plane)
+  hosts: k3s_server
+  become: true
+  roles:
+    - role: k3s
+      vars:
+        k3s_role: server
+
+- name: Instalar los agents y unirlos al server
+  hosts: k3s_agents
+  become: true
+  roles:
+    - role: k3s
+      vars:
+        k3s_role: agent
+
+# La etiqueta de tier se pone al registrar el nodo, pero si luego la cambias en
+# host_vars K3s no la actualiza. Aquí se aplica siempre, desde el server.
+- name: Etiquetar los nodos
+  hosts: k3s_server
+  become: true
+  gather_facts: false
+  tasks:
+    - name: Esperar a que cada nodo esté registrado
+      ansible.builtin.command: k3s kubectl get node {{ item }}
+      loop: "{{ groups['homelab'] }}"
+      register: k3s_node_registered
+      until: k3s_node_registered.rc == 0
+      retries: 24
+      delay: 5
+      changed_when: false
+
+    - name: Aplicar la etiqueta de tier
+      ansible.builtin.command: >-
+        k3s kubectl label node {{ item }} homelab.io/tier={{ hostvars[item].homelab_tier }} --overwrite
+      loop: "{{ groups['homelab'] }}"
+      register: k3s_label_tier
+      changed_when: "'not labeled' not in k3s_label_tier.stdout"
+
+    # Solo estética para `kubectl get nodes`: que la columna ROLES diga "worker".
+    - name: Marcar los agents como worker
+      ansible.builtin.command: >-
+        k3s kubectl label node {{ item }} node-role.kubernetes.io/worker=true --overwrite
+      loop: "{{ groups['k3s_agents'] }}"
+      register: k3s_label_worker
+      changed_when: "'not labeled' not in k3s_label_worker.stdout"
+
+    - name: Siguiente paso
+      ansible.builtin.debug:
+        msg:
+          - "K3s instalado. Kubeconfig en {{ k3s_kubeconfig_local }}"
+          - "Los nodos estarán NotReady hasta instalar Cilium: es lo esperado."
+          - "Siguiente: make cilium"

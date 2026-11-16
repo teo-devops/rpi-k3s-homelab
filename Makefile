@@ -11,6 +11,11 @@ EXAMPLE_INV := inventory/hosts.example.yml
 #   make prepare LIMIT=rpi4-2g      -> solo un nodo
 TAGS  ?=
 LIMIT ?=
+
+# Fase 2. Todo `kubectl`/`helm` lanzado desde este Makefile usa SOLO el kubeconfig
+# del homelab, aunque tengas otros clústeres configurados en ~/.kube/config.
+CILIUM_VERSION := 1.20.4
+export KUBECONFIG := $(HOME)/.kube/rpi-k3s-homelab.yaml
 ANSIBLE_ARGS := $(if $(TAGS),--tags $(TAGS)) $(if $(LIMIT),--limit $(LIMIT))
 
 .DEFAULT_GOAL := help
@@ -56,6 +61,37 @@ prepare: ## Prepara los nodos (SO, SSH, kernel, swap, SD...)
 validate: ## Verifica que los nodos están listos para K3s y Cilium
 	cd $(ANSIBLE_DIR) && ansible-playbook playbooks/99-validate.yml $(if $(LIMIT),--limit $(LIMIT))
 
+## ---------- Fase 2: K3s y Cilium ----------
+
+.PHONY: k3s
+k3s: ## Instala K3s (1 server + agents) y trae el kubeconfig
+	cd $(ANSIBLE_DIR) && ansible-playbook playbooks/10-k3s.yml $(ANSIBLE_ARGS)
+
+.PHONY: cilium
+cilium: ## Instala Cilium (red, LoadBalancer, Hubble)
+	CILIUM_VERSION=$(CILIUM_VERSION) ./scripts/install-cilium.sh
+
+.PHONY: cilium-status
+cilium-status: ## Estado de Cilium (necesita la CLI cilium)
+	cilium status --wait
+
+.PHONY: hubble-ui
+hubble-ui: ## Abre Hubble UI en tu navegador (port-forward)
+	cilium hubble ui
+
+.PHONY: nodes
+nodes: ## Nodos con su tier y su uso de recursos
+	kubectl get nodes -o wide -L homelab.io/tier
+	@kubectl top nodes 2>/dev/null || true
+
+.PHONY: cluster-check
+cluster-check: ## Comprobación rápida del clúster
+	./scripts/validate-cluster.sh
+
+.PHONY: k3s-uninstall
+k3s-uninstall: ## BORRA K3s de todos los nodos (pide confirmación)
+	cd $(ANSIBLE_DIR) && ansible-playbook playbooks/90-k3s-uninstall.yml
+
 ## ---------- Calidad ----------
 
 .PHONY: lint
@@ -69,6 +105,4 @@ docs-check: ## Busca enlaces internos rotos en la documentación
 	@./scripts/check-docs-links.sh
 
 ## ---------- Fases siguientes (ver docs/README.md) ----------
-# k3s:        instalar el server y los agents sin flannel ni kube-proxy (fase 2)
-# cilium:     CNI, LB-IPAM y Hubble (fase 2)
 # flux:       bootstrap de GitOps (fase 3)

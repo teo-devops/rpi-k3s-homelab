@@ -1,0 +1,41 @@
+# Desinstala K3s de todos los nodos. DESTRUCTIVO: borra el clúster, sus datos
+# y los volúmenes local-path. El sistema operativo preparado en la fase 1 se queda.
+# Útil para aprender: instalar, romper, volver a empezar.
+#
+# Uso:  make k3s-uninstall   (pide confirmación)
+
+- name: Confirmar
+  hosts: localhost
+  gather_facts: false
+  vars_prompt:
+    - name: k3s_uninstall_confirm
+      prompt: "Esto BORRA el clúster y todos sus datos. Escribe 'borrar' para continuar"
+      private: false
+  tasks:
+    - name: Parar si no se confirma
+      ansible.builtin.assert:
+        that: k3s_uninstall_confirm == 'borrar'
+        fail_msg: "Cancelado. No se ha tocado nada."
+        quiet: true
+
+- name: Desinstalar los agents
+  hosts: k3s_agents
+  become: true
+  tasks:
+    - name: Ejecutar el desinstalador de agent
+      ansible.builtin.command: /usr/local/bin/k3s-agent-uninstall.sh
+      args:
+        removes: /usr/local/bin/k3s-agent-uninstall.sh
+
+- name: Desinstalar el server
+  hosts: k3s_server
+  become: true
+  tasks:
+    - name: Ejecutar el desinstalador de server
+      ansible.builtin.command: /usr/local/bin/k3s-uninstall.sh
+      args:
+        removes: /usr/local/bin/k3s-uninstall.sh
+
+    - name: Recordatorio
+      ansible.builtin.debug:
+        msg: "Clúster borrado. Tu kubeconfig local ya no sirve; `make k3s` lo regenera."

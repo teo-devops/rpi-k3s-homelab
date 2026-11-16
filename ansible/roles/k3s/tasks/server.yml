@@ -1,0 +1,36 @@
+- name: Esperar a que el API server responda
+  ansible.builtin.command: k3s kubectl get --raw /readyz
+  register: k3s_readyz
+  until: k3s_readyz.rc == 0
+  retries: 30
+  delay: 5
+  changed_when: false
+
+# El kubeconfig que genera K3s apunta a 127.0.0.1 y se llama "default".
+# Lo copiamos a tu portátil apuntando a la IP del server y con un nombre propio,
+# en un fichero aparte para no mezclarlo con otros clústeres que uses.
+- name: Leer el kubeconfig del server
+  ansible.builtin.slurp:
+    src: /etc/rancher/k3s/k3s.yaml
+  register: k3s_kubeconfig_raw
+  no_log: true
+
+- name: Crear ~/.kube en tu portátil
+  ansible.builtin.file:
+    path: "{{ k3s_kubeconfig_local | expanduser | dirname }}"
+    state: directory
+    mode: "0700"
+  delegate_to: localhost
+  become: false
+
+- name: Guardar el kubeconfig en tu portátil
+  ansible.builtin.copy:
+    dest: "{{ k3s_kubeconfig_local | expanduser }}"
+    mode: "0600"
+    content: >-
+      {{ k3s_kubeconfig_raw.content | b64decode
+         | replace('https://127.0.0.1:6443', 'https://' ~ ansible_host ~ ':6443')
+         | regex_replace('(?m)^(\s*-?\s*(name|cluster|user|current-context)): default$', '\1: ' ~ k3s_kubeconfig_context) }}
+  delegate_to: localhost
+  become: false
+  no_log: true

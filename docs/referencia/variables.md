@@ -13,7 +13,8 @@ Dónde se define cada variable y su valor por defecto. Para entender la priorida
 | `base_upgrade_packages` | `true` | Actualizar todo el sistema en cada ejecución |
 | `homelab_domain` | `example.com` | Dominio base (fase 5) |
 | `network_static_enabled` | `false` | IP estática con NetworkManager |
-| `homelab_lb_ip_range` | `192.168.1.200-192.168.1.220` | IPs de LoadBalancer para Cilium (fase 2) |
+| `k3s_version` | `v1.36.6+k3s1` | Versión de K3s instalada |
+| `k3s_kubeconfig_local` | `~/.kube/rpi-k3s-homelab.yaml` | Dónde se guarda el kubeconfig en tu portátil |
 | `sdcard_protection_enabled` | `true` | Activa el rol `sdcard` |
 | `nvme_enabled` | `false` | Activa el rol `nvme` y PCIe |
 
@@ -21,10 +22,10 @@ Dónde se define cada variable y su valor por defecto. Para entender la priorida
 
 | Variable | Ejemplo | Qué controla |
 |----------|---------|--------------|
-| `homelab_tier` | `large` | Etiqueta `homelab.io/tier` (fase 2) |
-| `kubelet_system_reserved` | `cpu=250m,memory=384Mi` | Reserva para el sistema operativo (fase 2) |
-| `kubelet_kube_reserved` | `cpu=250m,memory=512Mi` | Reserva para K3s (fase 2) |
-| `kubelet_eviction_hard` | `memory.available<256Mi` | Umbral de desalojo (fase 2) |
+| `homelab_tier` | `large` | Etiqueta `homelab.io/tier` |
+| `kubelet_system_reserved` | `cpu=250m,memory=384Mi` | Reserva para el sistema operativo |
+| `kubelet_kube_reserved` | `cpu=250m,memory=512Mi` | Reserva para K3s |
+| `kubelet_eviction_hard` | `memory.available<256Mi` | Umbral de desalojo |
 
 ## Por rol (`roles/<rol>/defaults/main.yml`)
 
@@ -48,3 +49,11 @@ Dónde se define cada variable y su valor por defecto. Para entender la priorida
 | boot | `boot_pi5_force_4k_kernel` | `true` |
 | boot | `boot_headless_tweaks` | `true` |
 | boot | `boot_pcie_gen3` | `true` |
+| k3s | `k3s_cluster_cidr` / `k3s_service_cidr` | `10.42.0.0/16` / `10.43.0.0/16` |
+| k3s | `k3s_disable_components` | `servicelb`, `traefik` |
+| k3s | `k3s_secrets_encryption` | `true` |
+| k3s | `k3s_kubeconfig_context` | `rpi-k3s-homelab` |
+
+El rango de IPs de LoadBalancer no es una variable de Ansible: está en
+[`lb-ippool.yaml`](../../kubernetes/infrastructure/cilium/config/lb-ippool.yaml). La versión de Cilium está en el
+[`Makefile`](../../Makefile) (`CILIUM_VERSION`).

@@ -16,7 +16,7 @@ Conocer las reglas que sigue todo el repo para no tener que adivinarlas.
 
 | Carpeta | Contenido |
 |---------|-----------|
-| `ansible/` | Preparación de los nodos (sistema operativo) y, en la fase 2, instalación de K3s |
+| `ansible/` | Preparación de los nodos (sistema operativo) e instalación de K3s |
 | `kubernetes/` | Todo lo que vive dentro del clúster. Flux lo aplica desde Git |
 | `terraform/` | Recursos fuera de casa: DNS y túnel en Cloudflare (opcional) |
 | `scripts/` | Comprobaciones de apoyo |

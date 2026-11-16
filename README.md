@@ -74,12 +74,26 @@ make validate   # comprueba que están listos para K3s y Cilium
 
 Paso a paso y explicado: [docs/04-ansible/04-preparar-los-nodos.md](docs/04-ansible/04-preparar-los-nodos.md).
 
+## Inicio rápido (fase 2)
+
+Edita antes el rango de IPs de LoadBalancer en
+[`kubernetes/infrastructure/cilium/config/lb-ippool.yaml`](kubernetes/infrastructure/cilium/config/lb-ippool.yaml).
+
+```bash
+make k3s            # K3s: 1 server + 2 agents (quedan NotReady: aún no hay red)
+make cilium         # Cilium: red, LoadBalancer en tu LAN, Hubble
+make nodes          # los tres Ready, con su tier
+make cilium-status
+```
+
+Guía: [docs/05-kubernetes-k3s](docs/05-kubernetes-k3s/README.md) y [docs/06-redes-cilium](docs/06-redes-cilium/README.md).
+
 ## Hoja de ruta
 
 | Fase | Contenido | Estado |
 |------|-----------|--------|
 | 1 | Preparación de nodos con Ansible, documentación base | Hecho |
-| 2 | K3s server/agents + Cilium (CNI, kube-proxy, LB-IPAM, Hubble) | Pendiente |
+| 2 | K3s server/agents + Cilium (CNI, kube-proxy, LB-IPAM, Hubble) | Hecho |
 | 3 | Flux, SOPS/age, Headlamp | Pendiente |
 | 4 | Almacenamiento: local-path con afinidad, copias con Velero | Pendiente |
 | 5 | Traefik, cert-manager DNS-01, Cloudflare Tunnel, Tailscale | Pendiente |
@@ -90,7 +104,7 @@ Paso a paso y explicado: [docs/04-ansible/04-preparar-los-nodos.md](docs/04-ansi
 ## Estructura
 
 ```
-ansible/        preparación de los nodos (y K3s en la fase 2)
+ansible/        preparación de los nodos e instalación de K3s
 kubernetes/     lo que corre dentro del clúster, aplicado por Flux
 terraform/      Cloudflare como código (opcional)
 scripts/        comprobaciones de apoyo

@@ -1,0 +1,39 @@
+# Gestionado por Ansible (rpi-k3s-homelab, rol k3s). No editar a mano.
+# K3s lee este fichero al arrancar: cada clave equivale a un flag de línea de comandos.
+# Explicación de cada opción: docs/05-kubernetes-k3s/03-instalar.md
+
+node-name: {{ inventory_hostname }}
+node-ip: {{ ansible_host }}
+{% if k3s_role == 'server' %}
+
+# --- Control plane ---
+write-kubeconfig-mode: "0600"
+tls-san:
+  - {{ ansible_host }}
+  - {{ inventory_hostname }}
+cluster-cidr: {{ k3s_cluster_cidr }}
+service-cidr: {{ k3s_service_cidr }}
+secrets-encryption: {{ k3s_secrets_encryption | lower }}
+
+# --- Red: todo esto lo hace Cilium ---
+flannel-backend: none          # sin CNI de serie
+disable-network-policy: true   # Cilium aplica las NetworkPolicy
+disable-kube-proxy: true       # Cilium sustituye a kube-proxy con eBPF
+disable:
+{% for component in k3s_disable_components %}
+  - {{ component }}
+{% endfor %}
+{% else %}
+
+# --- Unión al clúster ---
+server: {{ k3s_server_url }}
+token: {{ k3s_join_token }}
+{% endif %}
+
+# --- Reparto por memoria (docs/01-hardware/03-presupuesto-de-memoria.md) ---
+node-label:
+  - homelab.io/tier={{ homelab_tier }}
+kubelet-arg:
+  - system-reserved={{ kubelet_system_reserved }}
+  - kube-reserved={{ kubelet_kube_reserved }}
+  - eviction-hard={{ kubelet_eviction_hard }}

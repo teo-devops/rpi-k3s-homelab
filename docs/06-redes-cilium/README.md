@@ -1,25 +1,19 @@
 # 06 · Redes con Cilium
 
-> **Pendiente: fase 2.** Este tema tiene su índice y objetivos; las páginas se escriben junto con el código
-> de esa fase. Mientras tanto, las decisiones de diseño ya están en [decisiones/](../decisiones/README.md).
+La red del clúster con eBPF: conectar pods, implementar Services sin kube-proxy, dar IPs de tu LAN a los
+servicios sin MetalLB, filtrar tráfico y verlo todo con Hubble.
 
-## Objetivos
+| Página | Contenido |
+|--------|-----------|
+| [01 · Qué es un CNI](01-que-es-un-cni.md) | El problema que resuelve la red de pods |
+| [02 · eBPF en cinco minutos](02-ebpf.md) | Por qué Cilium no usa iptables |
+| [03 · Instalar Cilium](03-instalar-cilium.md) | `make cilium` y cada valor de Helm explicado |
+| [04 · LoadBalancer en casa](04-loadbalancer-en-casa.md) | LB-IPAM y anuncios L2 con un ejemplo |
+| [05 · NetworkPolicy](05-networkpolicy.md) | Denegar por defecto y abrir lo justo |
+| [06 · Hubble](06-hubble.md) | Ver el tráfico y los paquetes descartados |
+| [07 · Errores comunes](07-errores-comunes.md) | Qué hacer cuando algo falla |
 
-- Entender qué hace un CNI y por qué Cilium usa eBPF en vez de iptables.
-- Instalar Cilium con Helm como CNI y **sustituto de kube-proxy**.
-- Configurar **LB-IPAM + L2 announcements**: IPs de LoadBalancer en tu red de casa sin MetalLB.
-- Escribir las primeras **NetworkPolicy** y ver su efecto.
-- Usar **Hubble** (CLI y UI) para ver el tráfico entre pods en tiempo real.
-
-## Índice previsto
-
-1. Qué es un CNI. Flannel frente a Cilium
-2. eBPF en cinco minutos
-3. Instalar Cilium (valores de Helm comentados)
-4. LoadBalancer en casa: LB-IPAM y anuncios L2
-5. NetworkPolicy: denegar por defecto y abrir lo necesario
-6. Hubble: observar la red
-7. Errores comunes
+Requisito: K3s instalado ([05/03](../05-kubernetes-k3s/03-instalar.md)), con los nodos en `NotReady`.
 
 Decisiones relacionadas: [0006 Cilium LB frente a MetalLB](../decisiones/0006-cilium-lb-vs-metallb.md).
 

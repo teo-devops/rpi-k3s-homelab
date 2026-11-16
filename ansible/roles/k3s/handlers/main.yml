@@ -1,0 +1,7 @@
+# Solo reinicia si K3s ya estaba instalado: en una instalación nueva, el
+# instalador arranca el servicio con la configuración ya escrita.
+- name: Reiniciar K3s
+  ansible.builtin.systemd_service:
+    name: "{{ 'k3s' if k3s_role == 'server' else 'k3s-agent' }}"
+    state: restarted
+  when: not (k3s_needs_install | bool)

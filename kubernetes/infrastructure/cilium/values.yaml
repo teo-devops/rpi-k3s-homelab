@@ -1,0 +1,65 @@
+# Valores de Helm para Cilium en rpi-k3s-homelab.
+# Explicación de cada bloque: docs/06-redes-cilium/03-instalar-cilium.md
+#
+# k8sServiceHost (la IP del API server) NO está aquí a propósito: depende de tu
+# red. scripts/install-cilium.sh la saca de tu kubeconfig y la pasa con --set.
+
+# --- Sustituir a kube-proxy ---
+# K3s se instaló con disable-kube-proxy: Cilium implementa los Services con eBPF.
+# Sin kube-proxy, Cilium no puede usar el Service "kubernetes" para hablar con el
+# API server (lo implementa él mismo): por eso necesita su IP directa.
+kubeProxyReplacement: true
+k8sServicePort: 6443
+
+# --- Direcciones de los pods ---
+# Mismo rango que cluster-cidr de K3s. Cada nodo recibe un /24 de aquí.
+ipam:
+  mode: cluster-pool
+  operator:
+    clusterPoolIPv4PodCIDRList: ["10.42.0.0/16"]
+    clusterPoolIPv4MaskSize: 24
+
+# --- Enrutado ---
+# Los tres nodos están en el mismo switch (misma red L2), así que no hace falta
+# encapsular (VXLAN): cada nodo aprende las rutas a los pods de los demás.
+# Menos CPU y paquetes más grandes. Si algún día un nodo está en otra red,
+# vuelve a routingMode: tunnel.
+routingMode: native
+autoDirectNodeRoutes: true
+ipv4NativeRoutingCIDR: 10.42.0.0/16
+
+# Traducción de direcciones de pods hacia fuera (internet) hecha con eBPF.
+bpf:
+  masquerade: true
+
+# --- LoadBalancer en la red de casa (sustituye a MetalLB) ---
+# El rango de IPs está en config/lb-ippool.yaml y los anuncios en config/l2-policy.yaml.
+l2announcements:
+  enabled: true
+# Los anuncios L2 usan "leases" del API server; con el límite por defecto (10/s)
+# pueden retrasarse. La documentación de Cilium recomienda subirlo.
+k8sClientRateLimit:
+  qps: 20
+  burst: 40
+
+# --- Operador ---
+# Con 3 nodos basta una réplica; va al nodo grande.
+operator:
+  replicas: 1
+  nodeSelector:
+    homelab.io/tier: large
+
+# --- Hubble: ver el tráfico de red ---
+hubble:
+  enabled: true
+  relay:
+    enabled: true
+    nodeSelector:
+      homelab.io/tier: large
+  ui:
+    enabled: true
+    nodeSelector:
+      homelab.io/tier: large
+
+# Reinicia los pods de Cilium cuando cambia su configuración.
+rollOutCiliumPods: true

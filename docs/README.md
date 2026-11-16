@@ -24,8 +24,8 @@ Esta carpeta es un curso práctico. Cada tema explica **qué** vamos a hacer, **
 | 02 | [Sistema operativo](02-sistema-operativo/README.md) | Flashear la SD, qué necesita Linux para Kubernetes | Listo | 45 min |
 | 03 | [Red](03-red/README.md) | Direcciones, DNS, dominio, acceso remoto | Listo | 30 min |
 | 04 | [Ansible](04-ansible/README.md) | Automatizar la preparación de los nodos | Listo | 45 min |
-| 05 | [Kubernetes con K3s](05-kubernetes-k3s/README.md) | Control plane y workers, reparto por memoria | Fase 2 | — |
-| 06 | [Redes con Cilium](06-redes-cilium/README.md) | eBPF, LoadBalancer sin MetalLB, Hubble | Fase 2 | — |
+| 05 | [Kubernetes con K3s](05-kubernetes-k3s/README.md) | Control plane y workers, reparto por memoria | Listo | 45 min |
+| 06 | [Redes con Cilium](06-redes-cilium/README.md) | eBPF, LoadBalancer sin MetalLB, Hubble | Listo | 1 h 30 min |
 | 07 | [GitOps con Flux](07-gitops-flux/README.md) | El clúster se configura desde Git | Fase 3 | — |
 | 08 | [Almacenamiento](08-almacenamiento/README.md) | Volúmenes, afinidad, copias, NVMe | Fase 4 | — |
 | 09 | [Exposición y seguridad](09-exposicion-y-seguridad/README.md) | TLS, Cloudflare Tunnel, Tailscale | Fase 5 | — |

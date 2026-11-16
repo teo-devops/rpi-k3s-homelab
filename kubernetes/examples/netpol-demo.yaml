@@ -1,0 +1,28 @@
+# NetworkPolicy en dos pasos: denegar todo el tráfico de entrada en el
+# namespace demo, y después permitir solo a los pods con la etiqueta acceso=si.
+# Requiere whoami-lb.yaml aplicado antes.
+# Guía: docs/06-redes-cilium/05-networkpolicy.md
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: denegar-entrada
+  namespace: demo
+spec:
+  podSelector: {}          # todos los pods del namespace
+  policyTypes: [Ingress]   # sin reglas "ingress": no entra nada
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: permitir-whoami
+  namespace: demo
+spec:
+  podSelector:
+    matchLabels: { app: whoami }
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels: { acceso: "si" }
+      ports:
+        - port: 80
