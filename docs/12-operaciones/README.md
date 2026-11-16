@@ -12,7 +12,9 @@ Tareas del día a día. Este tema crece con cada fase.
 - Cambiar reservas o tier de un nodo: edita su `host_vars` y `make k3s LIMIT=<nodo>` ([05/04](../05-kubernetes-k3s/04-etiquetas-y-reservas.md)).
 - Actualizar K3s: comprueba la compatibilidad con Cilium, cambia `k3s_version` y `make k3s`. El playbook
   actualiza primero el server y luego los agents.
-- Actualizar Cilium: cambia `CILIUM_VERSION` en el Makefile y `make cilium` ([06/03](../06-redes-cilium/03-instalar-cilium.md#actualizar-cilium)).
+- Actualizar Cilium: cambia `version` en su HelmRelease y haz push ([07/04](../07-gitops-flux/04-flux-adopta-cilium.md)).
+- Cualquier cambio dentro del clúster: commit y push; `make flux-reconcile` para no esperar ([07/07](../07-gitops-flux/07-flujo-de-trabajo.md)).
+- Ver qué está aplicando Flux: `make flux-status`; interfaz web: `make headlamp`.
 - Empezar el clúster de cero: `make k3s-uninstall` y `make k3s`.
 
 ## Índice previsto
@@ -20,7 +22,7 @@ Tareas del día a día. Este tema crece con cada fase.
 1. Apagar y encender el clúster en orden (fase 2)
 2. Actualizar el sistema operativo nodo a nodo sin cortar servicio (`kubectl drain`)
 3. Actualizar K3s con más detalle: drenar nodos, orden, vuelta atrás
-4. Actualizar componentes con Flux y Renovate (fase 3)
+4. Actualizaciones automáticas de versiones con Renovate
 5. Restaurar desde copia (fase 4)
 6. Guía de diagnóstico: de "no funciona" a la causa
 

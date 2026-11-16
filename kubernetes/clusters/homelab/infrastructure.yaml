@@ -1,0 +1,49 @@
+# La plataforma, en dos capas que se aplican en orden:
+#   infra-controllers -> instala software (Cilium, Headlamp...) con Helm
+#   infra-configs     -> configura ese software con sus propios tipos de recurso,
+#                        que solo existen cuando la capa anterior está lista
+# Guía: docs/07-gitops-flux/02-estructura.md
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: infra-controllers
+  namespace: flux-system
+spec:
+  interval: 10m
+  path: ./kubernetes/infrastructure/controllers
+  prune: true
+  wait: true             # no se da por buena hasta que todo lo aplicado está sano
+  timeout: 15m
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-age
+  # Variables propias de tu red que no están en Git (las crea `make flux`):
+  # ${K8S_SERVICE_HOST} en los manifiestos se sustituye por su valor.
+  postBuild:
+    substituteFrom:
+      - kind: ConfigMap
+        name: cluster-vars
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: infra-configs
+  namespace: flux-system
+spec:
+  dependsOn:
+    - name: infra-controllers
+  interval: 10m
+  path: ./kubernetes/infrastructure/configs
+  prune: true
+  wait: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-age

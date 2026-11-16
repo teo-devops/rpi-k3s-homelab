@@ -1,0 +1,32 @@
+# De dónde lee Flux y qué aplica. Guía: docs/07-gitops-flux/03-bootstrap.md
+#
+# El repo es PÚBLICO: Flux lo lee por HTTPS sin credenciales. Flux nunca escribe
+# en Git, así que no necesita clave de despliegue ni token de GitHub.
+# Si haces un fork, cambia la URL por la de tu repo.
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: GitRepository
+metadata:
+  name: flux-system
+  namespace: flux-system
+spec:
+  interval: 1m           # cada minuto mira si hay commits nuevos
+  url: https://github.com/teo-devops/rpi-k3s-homelab
+  ref:
+    branch: main
+  # Solo descarga la carpeta kubernetes/: la guía y Ansible no le interesan.
+  ignore: |
+    /*
+    !/kubernetes/
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: flux-system
+  namespace: flux-system
+spec:
+  interval: 10m          # cada 10 min re-aplica aunque Git no cambie: corrige desviaciones
+  path: ./kubernetes/clusters/homelab
+  prune: true            # lo que borras de Git se borra del clúster
+  sourceRef:
+    kind: GitRepository
+    name: flux-system

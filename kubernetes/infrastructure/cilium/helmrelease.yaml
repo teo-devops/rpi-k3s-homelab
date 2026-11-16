@@ -1,0 +1,32 @@
+# Flux adopta la release "cilium" que instaló `make cilium` en la fase 2: mismo
+# nombre y namespace, así que en vez de instalar otra, la actualiza.
+# Guía: docs/07-gitops-flux/04-flux-adopta-cilium.md
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: cilium
+  namespace: kube-system
+  annotations:
+    # Si este fichero desaparece de Git, Flux NO desinstala Cilium. Sin red de
+    # pods, ni Flux podría arreglar el clúster.
+    kustomize.toolkit.fluxcd.io/prune: disabled
+spec:
+  interval: 30m
+  releaseName: cilium
+  chart:
+    spec:
+      chart: cilium
+      version: "1.20.4"   # comprobar compatibilidad con la versión de K3s antes de subirla
+      sourceRef:
+        kind: HelmRepository
+        name: cilium
+  upgrade:
+    remediation:
+      retries: 3
+  valuesFrom:
+    - kind: ConfigMap
+      name: cilium-values
+      valuesKey: values.yaml
+  values:
+    # Sustituido por Flux desde el ConfigMap cluster-vars (no está en Git).
+    k8sServiceHost: ${K8S_SERVICE_HOST}

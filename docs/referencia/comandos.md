@@ -20,6 +20,12 @@
 | `make nodes` | Nodos, tier y consumo |
 | `make cluster-check` | Comprobación rápida del clúster |
 | `make k3s-uninstall` | Borra K3s de todos los nodos (pide confirmación) |
+| `make sops-init` | Clave age, `.sops.yaml` y Secret para Flux |
+| `make sops-encrypt FILE=...` | Cifra un Secret |
+| `make flux` | Instala Flux y lo conecta con GitHub |
+| `make flux-status` | Estado de Flux y de todo lo que gestiona |
+| `make flux-reconcile` | Sincroniza con Git ya |
+| `make headlamp` | Interfaz web con token de solo lectura |
 | `make lint` | yamllint, ansible-lint, shellcheck |
 | `make docs-check` | Enlaces rotos en la documentación |
 
@@ -45,6 +51,18 @@ ansible all -b -m ansible.builtin.command -a 'uptime'                  # un coma
 | `hubble observe --verdict DROPPED -f` | Paquetes descartados en directo |
 | `kubectl -n kube-system get lease \| grep l2announce` | Qué nodo anuncia cada IP de LoadBalancer |
 | `kubectl get ciliumloadbalancerippools` | IPs libres del pool |
+
+## Flux
+
+| Comando | Qué hace |
+|---------|----------|
+| `flux get all -A` | Estado de fuentes, Kustomizations y HelmReleases |
+| `flux reconcile kustomization <nombre> --with-source` | Aplicar ya, releyendo Git |
+| `flux suspend kustomization <nombre>` / `flux resume ...` | Pausar y reanudar |
+| `flux logs --level=error --since=10m` | Errores recientes de los controladores |
+| `flux events --for Kustomization/<nombre>` | Historia de una Kustomization |
+| `helm -n kube-system history cilium` | Revisiones de una release (también las de Flux) |
+| `sops <fichero>.sops.yaml` | Editar un secreto cifrado (con `SOPS_AGE_KEY_FILE`) |
 
 ## En un nodo
 

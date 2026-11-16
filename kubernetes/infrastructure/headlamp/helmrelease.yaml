@@ -1,0 +1,56 @@
+# Headlamp: interfaz web para Kubernetes, con el plugin de Flux.
+# Guía: docs/07-gitops-flux/06-headlamp.md
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: headlamp
+  namespace: headlamp
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: headlamp
+      version: "0.46.0"
+      sourceRef:
+        kind: HelmRepository
+        name: headlamp
+  values:
+    # Headlamp no usa permisos propios: cada persona entra con SU token y ve
+    # lo que ese token permite. Por eso no le damos cluster-admin al pod.
+    clusterRoleBinding:
+      create: false
+
+    nodeSelector:
+      homelab.io/tier: large
+    resources:
+      requests: { cpu: 10m, memory: 48Mi }
+      limits: { memory: 192Mi }
+
+    # Plugin de Flux. El chart trae un "plugin manager" que ejecuta Node.js de
+    # forma permanente (su documentación sugiere reservar 2 GB). En su lugar,
+    # un initContainer de busybox descarga el plugin UNA vez, comprueba su
+    # checksum y lo deja en una carpeta compartida con Headlamp.
+    # Versión y checksum: https://artifacthub.io/packages/headlamp/headlamp-plugins/headlamp_flux
+    initContainers:
+      - name: plugin-flux
+        image: busybox:1.37
+        command: ["sh", "-c"]
+        args:
+          - >-
+            set -e;
+            wget -qO /tmp/flux.tgz https://github.com/headlamp-k8s/plugins/releases/download/flux-0.8.0/headlamp-k8s-flux-0.8.0.tar.gz;
+            echo "48abf409e6f6e5b7898532d036e38c3d8b4329d646f2b3bf9af10f5f5a2b924f  /tmp/flux.tgz" | sha256sum -c -;
+            tar xzf /tmp/flux.tgz -C /headlamp/plugins;
+            ls /headlamp/plugins
+        volumeMounts:
+          - name: plugins
+            mountPath: /headlamp/plugins
+        resources:
+          requests: { cpu: 10m, memory: 16Mi }
+          limits: { memory: 64Mi }
+    volumes:
+      - name: plugins
+        emptyDir: {}
+    volumeMounts:
+      - name: plugins
+        mountPath: /headlamp/plugins

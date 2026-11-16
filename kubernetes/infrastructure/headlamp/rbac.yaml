@@ -1,0 +1,52 @@
+# Cuenta de SOLO LECTURA para entrar en Headlamp.
+# El token se genera bajo demanda: `make headlamp`.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: headlamp-lector
+  namespace: headlamp
+---
+# "view" es un rol de serie de Kubernetes: leer casi todo salvo Secrets.
+# Flux añade sus tipos (Kustomization, HelmRelease...) a ese rol automáticamente.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: headlamp-lector-view
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: view
+subjects:
+  - kind: ServiceAccount
+    name: headlamp-lector
+    namespace: headlamp
+---
+# "view" no incluye los nodos ni las definiciones de tipos (CRD), que Headlamp
+# y su plugin de Flux necesitan para mostrar el clúster completo.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: headlamp-lector-extra
+rules:
+  - apiGroups: [""]
+    resources: [nodes]
+    verbs: [get, list, watch]
+  - apiGroups: [apiextensions.k8s.io]
+    resources: [customresourcedefinitions]
+    verbs: [get, list, watch]
+  - apiGroups: [metrics.k8s.io]
+    resources: [nodes, pods]
+    verbs: [get, list]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: headlamp-lector-extra
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: headlamp-lector-extra
+subjects:
+  - kind: ServiceAccount
+    name: headlamp-lector
+    namespace: headlamp

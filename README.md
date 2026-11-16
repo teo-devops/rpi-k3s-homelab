@@ -88,13 +88,26 @@ make cilium-status
 
 Guía: [docs/05-kubernetes-k3s](docs/05-kubernetes-k3s/README.md) y [docs/06-redes-cilium](docs/06-redes-cilium/README.md).
 
+## Inicio rápido (fase 3)
+
+Sube el repo a GitHub (público) y comprueba la URL en
+[`gotk-sync.yaml`](kubernetes/clusters/homelab/flux-system/gotk-sync.yaml).
+
+```bash
+make flux           # Flux + clave SOPS; adopta Cilium e instala Headlamp desde Git
+make flux-status    # todo Ready
+make headlamp       # interfaz web en http://localhost:8080
+```
+
+Desde aquí, el clúster se cambia con `git push`. Guía: [docs/07-gitops-flux](docs/07-gitops-flux/README.md).
+
 ## Hoja de ruta
 
 | Fase | Contenido | Estado |
 |------|-----------|--------|
 | 1 | Preparación de nodos con Ansible, documentación base | Hecho |
 | 2 | K3s server/agents + Cilium (CNI, kube-proxy, LB-IPAM, Hubble) | Hecho |
-| 3 | Flux, SOPS/age, Headlamp | Pendiente |
+| 3 | Flux, SOPS/age, Headlamp | Hecho |
 | 4 | Almacenamiento: local-path con afinidad, copias con Velero | Pendiente |
 | 5 | Traefik, cert-manager DNS-01, Cloudflare Tunnel, Tailscale | Pendiente |
 | 6 | Monitorización y alertas | Pendiente |

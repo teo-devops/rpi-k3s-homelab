@@ -1,0 +1,5 @@
+# Tus aplicaciones: añade aquí una carpeta por app.
+# Guía: docs/07-gitops-flux/07-flujo-de-trabajo.md
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources: []

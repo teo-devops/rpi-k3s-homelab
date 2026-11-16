@@ -58,10 +58,16 @@ else
 fi
 
 echo
-echo "Fases siguientes"
-optional flux "fase 3, GitOps" "https://fluxcd.io/flux/installation/"
-optional sops "fase 3, cifrar secretos" "https://github.com/getsops/sops/releases"
-optional age "fase 3, claves de cifrado" "paquete age"
+echo "Fase 3 — GitOps con Flux"
+optional git "Flux lee el repo desde GitHub" "paquete git"
+optional age-keygen "crear la clave de cifrado" "paquete age"
+optional sops "cifrar secretos" "https://github.com/getsops/sops/releases"
+optional flux "ver y forzar la sincronización" "https://fluxcd.io/flux/installation/#install-the-flux-cli"
+if [ -f "$HOME/.config/sops/age/rpi-k3s-homelab.agekey" ]; then
+  ok "clave age ~/.config/sops/age/rpi-k3s-homelab.agekey"
+else
+  warn "clave age (aún no hace falta). La crea: make sops-init"
+fi
 
 echo
 echo "Calidad (opcional)"

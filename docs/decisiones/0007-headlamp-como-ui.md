@@ -24,5 +24,7 @@ Para métricas, dashboards de Flux en Grafana.
 
 ## Consecuencias
 
-- Headlamp necesita permisos de lectura amplios: se expone solo por Tailscale y con su propia autenticación.
+- Headlamp no recibe permisos propios: cada usuario entra con su token. El de uso diario es de solo lectura.
+- El plugin de Flux se instala con un initContainer que verifica el checksum, no con el plugin manager del
+  chart (un proceso Node.js permanente, demasiado pesado para este hardware).
 - Si aparece una UI oficial de Flux madura, se revisa esta decisión.

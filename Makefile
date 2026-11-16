@@ -16,6 +16,9 @@ LIMIT ?=
 # del homelab, aunque tengas otros clústeres configurados en ~/.kube/config.
 CILIUM_VERSION := 1.20.4
 export KUBECONFIG := $(HOME)/.kube/rpi-k3s-homelab.yaml
+# Fase 3. Clave privada de SOPS: fuera del repo.
+export SOPS_AGE_KEY_FILE := $(HOME)/.config/sops/age/rpi-k3s-homelab.agekey
+FILE ?=
 ANSIBLE_ARGS := $(if $(TAGS),--tags $(TAGS)) $(if $(LIMIT),--limit $(LIMIT))
 
 .DEFAULT_GOAL := help
@@ -68,7 +71,7 @@ k3s: ## Instala K3s (1 server + agents) y trae el kubeconfig
 	cd $(ANSIBLE_DIR) && ansible-playbook playbooks/10-k3s.yml $(ANSIBLE_ARGS)
 
 .PHONY: cilium
-cilium: ## Instala Cilium (red, LoadBalancer, Hubble)
+cilium: ## Instala Cilium (fase 2; desde la fase 3 lo gestiona Flux)
 	CILIUM_VERSION=$(CILIUM_VERSION) ./scripts/install-cilium.sh
 
 .PHONY: cilium-status
@@ -92,17 +95,50 @@ cluster-check: ## Comprobación rápida del clúster
 k3s-uninstall: ## BORRA K3s de todos los nodos (pide confirmación)
 	cd $(ANSIBLE_DIR) && ansible-playbook playbooks/90-k3s-uninstall.yml
 
+## ---------- Fase 3: GitOps con Flux ----------
+
+.PHONY: sops-init
+sops-init: ## Crea tu clave age, .sops.yaml y el Secret para Flux
+	./scripts/sops-init.sh
+
+.PHONY: sops-encrypt
+sops-encrypt: ## Cifra un Secret: make sops-encrypt FILE=ruta.sops.yaml
+	@test -n "$(FILE)" || (echo "Uso: make sops-encrypt FILE=kubernetes/apps/x/secreto.sops.yaml"; exit 1)
+	sops --encrypt --in-place $(FILE)
+
+.PHONY: flux
+flux: ## Instala Flux y lo conecta con el repo de GitHub
+	./scripts/flux-bootstrap.sh
+
+.PHONY: flux-status
+flux-status: ## Estado de todo lo que gestiona Flux
+	@if command -v flux >/dev/null 2>&1; then flux get all -A; \
+	else kubectl get gitrepositories,kustomizations,helmreleases -A; fi
+
+.PHONY: flux-reconcile
+flux-reconcile: ## Pide a Flux que lea Git ya, sin esperar
+	flux reconcile kustomization flux-system --with-source
+
+.PHONY: headlamp
+headlamp: ## Abre Headlamp en http://localhost:8080 (muestra el token)
+	@echo "Token de solo lectura (24 h), pégalo en Headlamp:"
+	@kubectl -n headlamp create token headlamp-lector --duration=24h
+	@echo
+	@echo "Abre http://localhost:8080   (Ctrl+C para cerrar)"
+	kubectl -n headlamp port-forward svc/headlamp 8080:80
+
 ## ---------- Calidad ----------
 
 .PHONY: lint
 lint: ## Pasa yamllint, ansible-lint y shellcheck
 	uvx yamllint .
 	cd $(ANSIBLE_DIR) && ANSIBLE_INVENTORY=$(EXAMPLE_INV) uvx --from ansible-lint ansible-lint playbooks/
-	shellcheck scripts/*.sh
+	shellcheck -x scripts/*.sh
+	./scripts/check-unencrypted-secrets.sh
 
 .PHONY: docs-check
 docs-check: ## Busca enlaces internos rotos en la documentación
 	@./scripts/check-docs-links.sh
 
 ## ---------- Fases siguientes (ver docs/README.md) ----------
-# flux:       bootstrap de GitOps (fase 3)
+# backup:     Velero (fase 4)

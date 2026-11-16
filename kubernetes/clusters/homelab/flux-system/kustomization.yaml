@@ -1,0 +1,16 @@
+# Flux se gestiona a sí mismo: sus propios manifiestos están en Git.
+# gotk-components.yaml lo genera `flux install --export` (Flux v2.10.0); no se edita a mano.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - gotk-components.yaml
+  - gotk-sync.yaml
+patches:
+  # Los cuatro controladores de Flux (~250 MB) van al nodo grande.
+  - target:
+      kind: Deployment
+      namespace: flux-system
+    patch: |
+      - op: add
+        path: /spec/template/spec/nodeSelector/homelab.io~1tier
+        value: large

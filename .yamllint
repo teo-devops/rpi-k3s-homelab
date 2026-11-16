@@ -1,4 +1,6 @@
 extends: default
+ignore: |
+  kubernetes/clusters/homelab/flux-system/gotk-components.yaml
 rules:
   line-length:
     max: 140

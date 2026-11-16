@@ -4,27 +4,20 @@
 # Guía: docs/06-redes-cilium/03-instalar-cilium.md
 set -euo pipefail
 
-REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# shellcheck source=scripts/lib.sh
+source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
 CILIUM_DIR="$REPO_ROOT/kubernetes/infrastructure/cilium"
 CILIUM_VERSION="${CILIUM_VERSION:?Falta CILIUM_VERSION}"
-EXPECTED_CONTEXT="${EXPECTED_CONTEXT:-rpi-k3s-homelab}"
 
-for cmd in kubectl helm; do
-  command -v "$cmd" >/dev/null || { echo "Falta $cmd. Ejecuta: make check"; exit 1; }
-done
+require_cmd kubectl helm
+require_homelab_context
 
-# Seguridad: no instalar nada en otro clúster por un KUBECONFIG equivocado.
-context=$(kubectl config current-context 2>/dev/null || true)
-if [ "$context" != "$EXPECTED_CONTEXT" ]; then
-  echo "El contexto actual es '$context', no '$EXPECTED_CONTEXT'. Abortado."
-  echo "¿Has ejecutado 'make k3s'? KUBECONFIG=${KUBECONFIG:-<sin definir>}"
-  exit 1
+# Desde la fase 3, Cilium lo gestiona Flux. Actualizarlo a mano crearía dos fuentes de verdad.
+if kubectl -n kube-system get helmreleases.helm.toolkit.fluxcd.io cilium >/dev/null 2>&1; then
+  die "Cilium ya lo gestiona Flux. Cambia kubernetes/infrastructure/cilium/ y haz push (docs/07-gitops-flux/04-flux-adopta-cilium.md)"
 fi
 
-# La IP del API server sale del propio kubeconfig: https://<ip>:6443
-server_url=$(kubectl config view --minify -o jsonpath='{.clusters[0].cluster.server}')
-api_host=${server_url#https://}
-api_host=${api_host%%:*}
+api_host=$(api_server_host)
 echo "API server: $api_host"
 
 echo "==> Instalando Cilium $CILIUM_VERSION"

@@ -54,6 +54,15 @@ Dónde se define cada variable y su valor por defecto. Para entender la priorida
 | k3s | `k3s_secrets_encryption` | `true` |
 | k3s | `k3s_kubeconfig_context` | `rpi-k3s-homelab` |
 
+## Fuera de Ansible
+
+| Dónde | Qué |
+|-------|-----|
+| `Makefile`: `CILIUM_VERSION` | Versión de Cilium para `make cilium` (fase 2) |
+| `Makefile`: `SOPS_AGE_KEY_FILE` | Ruta de tu clave privada age |
+| `gotk-sync.yaml`: `url` | Repo de GitHub que lee Flux |
+| ConfigMap `flux-system/cluster-vars` | `K8S_SERVICE_HOST`; lo crea `make flux`, no está en Git |
+
 El rango de IPs de LoadBalancer no es una variable de Ansible: está en
 [`lb-ippool.yaml`](../../kubernetes/infrastructure/cilium/config/lb-ippool.yaml). La versión de Cilium está en el
 [`Makefile`](../../Makefile) (`CILIUM_VERSION`).

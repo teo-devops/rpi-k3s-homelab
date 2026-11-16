@@ -81,8 +81,12 @@ Al terminar borra su namespace: `kubectl delete namespace cilium-test-1`.
 
 ## Actualizar Cilium
 
-Cambia `CILIUM_VERSION` en el Makefile (tras comprobar su compatibilidad con tu versión de Kubernetes) y
-vuelve a ejecutar `make cilium`. Helm actualiza en orden, nodo a nodo. En la fase 3, Flux se encargará.
+Antes de la fase 3: cambia `CILIUM_VERSION` en el Makefile (tras comprobar su compatibilidad con tu versión
+de Kubernetes) y vuelve a ejecutar `make cilium`. Helm actualiza en orden, nodo a nodo.
+
+Desde la fase 3 lo gestiona Flux: cambia `version` en
+[`helmrelease.yaml`](../../kubernetes/infrastructure/cilium/helmrelease.yaml) y haz push
+([07/04](../07-gitops-flux/04-flux-adopta-cilium.md)).
 
 ---
 Anterior: [02 · eBPF en cinco minutos](02-ebpf.md) · [Índice del tema](README.md) · Siguiente: [04 · LoadBalancer en casa](04-loadbalancer-en-casa.md)

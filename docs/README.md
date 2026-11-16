@@ -26,7 +26,7 @@ Esta carpeta es un curso práctico. Cada tema explica **qué** vamos a hacer, **
 | 04 | [Ansible](04-ansible/README.md) | Automatizar la preparación de los nodos | Listo | 45 min |
 | 05 | [Kubernetes con K3s](05-kubernetes-k3s/README.md) | Control plane y workers, reparto por memoria | Listo | 45 min |
 | 06 | [Redes con Cilium](06-redes-cilium/README.md) | eBPF, LoadBalancer sin MetalLB, Hubble | Listo | 1 h 30 min |
-| 07 | [GitOps con Flux](07-gitops-flux/README.md) | El clúster se configura desde Git | Fase 3 | — |
+| 07 | [GitOps con Flux](07-gitops-flux/README.md) | El clúster se configura desde Git | Listo | 1 h 30 min |
 | 08 | [Almacenamiento](08-almacenamiento/README.md) | Volúmenes, afinidad, copias, NVMe | Fase 4 | — |
 | 09 | [Exposición y seguridad](09-exposicion-y-seguridad/README.md) | TLS, Cloudflare Tunnel, Tailscale | Fase 5 | — |
 | 10 | [Monitorización](10-monitorizacion/README.md) | Prometheus, Grafana, alertas | Fase 6 | — |

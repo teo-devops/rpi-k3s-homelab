@@ -1,0 +1,6 @@
+# Capa 1 de la plataforma: software instalado con Helm.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../cilium
+  - ../headlamp
