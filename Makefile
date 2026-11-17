@@ -48,7 +48,7 @@ check: ## Comprueba las herramientas de tu portátil
 
 .PHONY: deps
 deps: ## Instala las colecciones de Ansible necesarias
-	cd $(ANSIBLE_DIR) && $(ANSIBLE_GALAXY) collection install -r requirements.yml
+	cd $(ANSIBLE_DIR) && $(ANSIBLE_GALAXY) collection install -r requirements.yml -p ~/.ansible/collections
 
 .PHONY: ping
 ping: ## Comprueba que Ansible llega a todos los nodos por SSH
