@@ -16,11 +16,11 @@ cifrado. Subirlo a un repo público es publicarlo. Y borrarlo después no sirve:
 | Pública (`age1...`) | `.sops.yaml` en la raíz del repo | Cifrar. Cualquiera puede cifrar para ti |
 | Privada | `~/.config/sops/age/rpi-k3s-homelab.agekey` en tu portátil, y el Secret `flux-system/sops-age` | Descifrar. Solo tú y Flux |
 
-```mermaid
-flowchart LR
-  P[Secret en claro<br/>tu portátil] -->|sops -e<br/>clave pública| E[Secret cifrado<br/>en Git]
-  E -->|Flux descifra<br/>clave privada| K[Secret en el clúster]
-```
+<p align="center">
+  <img src="../img/sops.svg" alt="El Secret se cifra en tu portátil con la clave pública, va cifrado a Git y Flux lo descifra con la privada" width="864">
+</p>
+
+<sub>Fuente editable: [docs/diagramas/sops.html](../diagramas/sops.html).</sub>
 
 Las reglas de `.sops.yaml` (lo escribe [`sops-init.sh`](../../scripts/sops-init.sh) al ejecutar `make sops-init`):
 

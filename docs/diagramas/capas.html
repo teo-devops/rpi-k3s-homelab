@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Capas del homelab</title>
+  <!-- Fuentes del sistema: sin Google Fonts, el SVG exportado no hace peticiones de red. -->
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --color-paper: #f5f5f5;
+      --color-ink: #2d3142;
+      --color-muted: #4f5d75;
+      --font-sans: 'Geist', system-ui, sans-serif;
+      --font-serif: 'Instrument Serif', Georgia, serif;
+      --font-mono: 'Geist Mono', ui-monospace, monospace;
+    }
+    body {
+      font-family: var(--font-sans);
+      background: var(--color-paper);
+      color: var(--color-ink);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem 1rem;
+    }
+    .frame { max-width: 1040px; width: 100%; }
+    .eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.66rem;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--color-muted);
+      margin-bottom: 0.5rem;
+    }
+    h1 {
+      font-family: var(--font-serif);
+      font-size: clamp(1.5rem, 2.4vw + 0.75rem, 2rem);
+      font-weight: 400;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+      margin-bottom: 1.5rem;
+    }
+    .scroll { overflow-x: auto; }
+    svg { width: 100%; min-width: 888px; display: block; }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <p class="eyebrow">Capas · rpi-k3s-homelab</p>
+    <h1>De la placa a tus servicios</h1>
+    <div class="scroll">
+      <svg viewBox="0 0 888 408" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="capas-title capas-desc">
+        <title id="capas-title">Capas del homelab</title>
+        <desc id="capas-desc">Las cinco capas del homelab, del hardware a las aplicaciones, y quién instala cada una: tú, Ansible o Flux.</desc>
+        <defs>
+          <pattern id="dots" width="22" height="22" patternUnits="userSpaceOnUse">
+            <circle cx="1" cy="1" r="0.9" fill="rgba(45,49,66,0.10)"/>
+          </pattern>
+          <marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4f5d75"/></marker>
+          <marker id="arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#bf4520"/></marker>
+          <marker id="arrow-link" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#2e5aa8"/></marker>
+        </defs>
+        <rect width="100%" height="100%" fill="#f5f5f5"/>
+        <rect width="100%" height="100%" fill="url(#dots)" opacity="0.55"/>
+        <rect x="96" y="48" width="752" height="64" fill="#ffffff"/>
+        <text x="116" y="84" fill="#5a6580" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" letter-spacing="0.18em">05</text>
+        <text x="160" y="78" fill="#2d3142" font-size="15" font-weight="600" font-family="'Geist', system-ui, sans-serif">Aplicaciones</text>
+        <text x="160" y="94" fill="#4f5d75" font-size="9" font-family="'Geist', system-ui, sans-serif">lo aplica Flux</text>
+        <text x="828" y="84" fill="#4f5d75" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="end">tus servicios · kubernetes/apps</text>
+        <rect x="96" y="112" width="752" height="64" fill="#f5f5f5"/>
+        <text x="116" y="148" fill="#5a6580" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" letter-spacing="0.18em">04</text>
+        <text x="160" y="142" fill="#2d3142" font-size="15" font-weight="600" font-family="'Geist', system-ui, sans-serif">Plataforma</text>
+        <text x="160" y="158" fill="#4f5d75" font-size="9" font-family="'Geist', system-ui, sans-serif">lo aplica Flux</text>
+        <text x="828" y="148" fill="#4f5d75" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="end">traefik · cert-manager · cloudflared · tailscale · prometheus · headlamp</text>
+        <line x1="96" y1="112" x2="848" y2="112" stroke="rgba(45,49,66,0.12)" stroke-width="1"/>
+        <rect x="96" y="176" width="752" height="64" fill="rgba(191,69,32,0.08)"/>
+        <text x="116" y="212" fill="#bf4520" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" letter-spacing="0.18em">03</text>
+        <text x="160" y="206" fill="#2d3142" font-size="15" font-weight="600" font-family="'Geist', system-ui, sans-serif">Kubernetes</text>
+        <text x="160" y="222" fill="#4f5d75" font-size="9" font-family="'Geist', system-ui, sans-serif">ansible + flux</text>
+        <text x="828" y="212" fill="#4f5d75" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="end">k3s: 1 server + 2 agents · cilium · local-path</text>
+        <line x1="96" y1="176" x2="848" y2="176" stroke="rgba(45,49,66,0.12)" stroke-width="1"/>
+        <rect x="96" y="240" width="752" height="64" fill="#f5f5f5"/>
+        <text x="116" y="276" fill="#5a6580" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" letter-spacing="0.18em">02</text>
+        <text x="160" y="270" fill="#2d3142" font-size="15" font-weight="600" font-family="'Geist', system-ui, sans-serif">Sistema operativo</text>
+        <text x="160" y="286" fill="#4f5d75" font-size="9" font-family="'Geist', system-ui, sans-serif">lo prepara Ansible</text>
+        <text x="828" y="276" fill="#4f5d75" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="end">raspberry pi os lite 64 bits</text>
+        <line x1="96" y1="240" x2="848" y2="240" stroke="rgba(45,49,66,0.12)" stroke-width="1"/>
+        <rect x="96" y="304" width="752" height="64" fill="#ffffff"/>
+        <text x="116" y="340" fill="#5a6580" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" letter-spacing="0.18em">01</text>
+        <text x="160" y="334" fill="#2d3142" font-size="15" font-weight="600" font-family="'Geist', system-ui, sans-serif">Hardware</text>
+        <text x="160" y="350" fill="#4f5d75" font-size="9" font-family="'Geist', system-ui, sans-serif">lo montas tú</text>
+        <text x="828" y="340" fill="#4f5d75" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="end">pi 5 · 8 GB  ·  pi 5 · 4 GB  ·  pi 4 · 2 GB</text>
+        <line x1="96" y1="304" x2="848" y2="304" stroke="rgba(45,49,66,0.12)" stroke-width="1"/>
+        <rect x="96" y="48" width="752" height="320" fill="none" stroke="#4f5d75" stroke-width="1"/>
+        <rect x="96" y="176" width="752" height="64" fill="none" stroke="#bf4520" stroke-width="1"/>
+        <line x1="56" y1="356" x2="56" y2="60" stroke="#4f5d75" stroke-width="1" marker-end="url(#arrow)"/>
+        <text x="96" y="36" fill="#5a6580" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" letter-spacing="0.18em">CADA CAPA SE APOYA EN LA DE ABAJO</text>
+      </svg>
+    </div>
+  </div>
+</body>
+</html>

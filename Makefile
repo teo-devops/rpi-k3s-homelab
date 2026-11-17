@@ -137,8 +137,9 @@ lint: ## Pasa yamllint, ansible-lint y shellcheck
 	./scripts/check-unencrypted-secrets.sh
 
 .PHONY: docs-check
-docs-check: ## Busca enlaces internos rotos en la documentación
+docs-check: ## Enlaces internos rotos y bloques Mermaid en la documentación
 	@./scripts/check-docs-links.sh
+	@./scripts/check-no-mermaid.sh
 
 ## ---------- Fases siguientes (ver docs/README.md) ----------
 # backup:     Velero (fase 4)
