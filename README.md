@@ -1,5 +1,7 @@
 # rpi-k3s-homelab
 
+[![ci](https://github.com/teo-devops/rpi-k3s-homelab/actions/workflows/ci.yml/badge.svg)](https://github.com/teo-devops/rpi-k3s-homelab/actions/workflows/ci.yml)
+
 Clúster Kubernetes (K3s) sobre tres Raspberry Pi **distintas** (8, 4 y 2 GB de RAM), construido paso a paso
 y explicado para aprender. Ansible prepara los nodos, Cilium se encarga de la red, Flux aplica todo desde Git
 y los servicios se exponen sin abrir puertos del router.

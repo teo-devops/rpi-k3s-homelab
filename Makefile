@@ -19,6 +19,9 @@ export KUBECONFIG := $(HOME)/.kube/rpi-k3s-homelab.yaml
 # Fase 3. Clave privada de SOPS: fuera del repo.
 export SOPS_AGE_KEY_FILE := $(HOME)/.config/sops/age/rpi-k3s-homelab.agekey
 FILE ?=
+# El mismo Ansible aislado (uvx) que usa ansible-lint: así ve las colecciones que instala,
+# aunque el sistema traiga otro Ansible con las suyas (pasa en los runners de GitHub).
+ANSIBLE_GALAXY := uvx --from ansible-core ansible-galaxy
 ANSIBLE_ARGS := $(if $(TAGS),--tags $(TAGS)) $(if $(LIMIT),--limit $(LIMIT))
 
 .DEFAULT_GOAL := help
@@ -46,7 +49,7 @@ check: ## Comprueba las herramientas de tu portátil
 
 .PHONY: deps
 deps: ## Instala las colecciones de Ansible necesarias
-	cd $(ANSIBLE_DIR) && ansible-galaxy collection install -r requirements.yml
+	cd $(ANSIBLE_DIR) && $(ANSIBLE_GALAXY) collection install -r requirements.yml
 
 .PHONY: ping
 ping: ## Comprueba que Ansible llega a todos los nodos por SSH
@@ -140,6 +143,13 @@ lint: ## Pasa yamllint, ansible-lint y shellcheck
 docs-check: ## Enlaces internos rotos y bloques Mermaid en la documentación
 	@./scripts/check-docs-links.sh
 	@./scripts/check-no-mermaid.sh
+
+.PHONY: k8s-check
+k8s-check: ## Construye y valida kubernetes/ sin clúster (kustomize + kubeconform)
+	@./scripts/check-kubernetes.sh
+
+.PHONY: ci
+ci: lint docs-check k8s-check ## Todo lo que comprueba el CI de GitHub
 
 ## ---------- Fases siguientes (ver docs/README.md) ----------
 # backup:     Velero (fase 4)

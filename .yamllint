@@ -6,6 +6,7 @@ rules:
     max: 140
   truthy:
     allowed-values: ["true", "false"]
+    check-keys: false   # `on:` de GitHub Actions es una clave, no un booleano
   comments:
     min-spaces-from-content: 1
   comments-indentation: false

@@ -16,6 +16,8 @@ Tareas del día a día. Este tema crece con cada fase.
 - Cualquier cambio dentro del clúster: commit y push; `make flux-reconcile` para no esperar ([07/07](../07-gitops-flux/07-flujo-de-trabajo.md)).
 - Ver qué está aplicando Flux: `make flux-status`; interfaz web: `make headlamp`.
 - Empezar el clúster de cero: `make k3s-uninstall` y `make k3s`.
+- Antes de hacer push: `make ci` ejecuta lo mismo que el CI de GitHub (lint, enlaces, secretos sin cifrar y
+  `make k8s-check`, que construye y valida `kubernetes/` sin clúster). El CI corre en cada push y cada PR.
 
 ## Índice previsto
 
