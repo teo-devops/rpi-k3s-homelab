@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="864" height="176" viewBox="0 0 864 176" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="sops-title sops-desc" id="sops-root">
+        <title id="sops-title">Cifrado de secretos con SOPS</title>
+        <desc id="sops-desc">Un Secret se cifra en el portátil con la clave pública, se guarda cifrado en Git y Flux lo descifra con la clave privada al aplicarlo en el clúster.</desc>
+        <defs>
+      <style>#sops-root { --color-paper: #f5f5f5;
+      --color-ink: #2d3142;
+      --color-muted: #4f5d75;
+      --font-sans: 'Geist', system-ui, sans-serif;
+      --font-serif: 'Instrument Serif', Georgia, serif;
+      --font-mono: 'Geist Mono', ui-monospace, monospace; }
+      #sops-root { font-family: var(--font-sans); color: var(--color-ink); }
+      #sops-root .scroll { overflow-x: auto; }</style>
+          <pattern id="sops-dots" width="22" height="22" patternUnits="userSpaceOnUse">
+            <circle cx="1" cy="1" r="0.9" fill="#2d3142" fill-opacity="0.10"/>
+          </pattern>
+          <marker id="sops-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4f5d75"/></marker>
+          <marker id="sops-arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#bf4520"/></marker>
+          <marker id="sops-arrow-link" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#2e5aa8"/></marker>
+        </defs>
+        <rect width="100%" height="100%" fill="#f5f5f5"/>
+        <rect width="100%" height="100%" fill="url(#sops-dots)" opacity="0.55"/>
+        <path d="M 216,72 H 344" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#sops-arrow)"/>
+        <path d="M 520,72 H 648" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#sops-arrow)"/>
+        <rect x="254" y="54" width="52" height="12" rx="2" fill="#f5f5f5"/>
+        <text x="280" y="63" fill="#4f5d75" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.06em">SOPS -E</text>
+        <rect x="542" y="54" width="84" height="12" rx="2" fill="#f5f5f5"/>
+        <text x="584" y="63" fill="#4f5d75" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.06em">FLUX DESCIFRA</text>
+        <rect x="40" y="40" width="176" height="64" rx="6" fill="#f5f5f5"/>
+        <rect x="40" y="40" width="176" height="64" rx="6" fill="#4f5d75" stroke="#5a6580" stroke-width="1" fill-opacity="0.10"/>
+        <rect x="48" y="48" width="52" height="12" rx="2" fill="none" stroke="#5a6580" stroke-width="0.8" stroke-opacity="0.40"/>
+        <text x="74" y="57" fill="#5a6580" font-size="7" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.08em">EN CLARO</text>
+        <text x="128" y="78" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', system-ui, sans-serif" text-anchor="middle">Secret en claro</text>
+        <text x="128" y="94" fill="#4f5d75" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">solo en tu portátil</text>
+        <rect x="344" y="40" width="176" height="64" rx="6" fill="#f5f5f5"/>
+        <rect x="344" y="40" width="176" height="64" rx="6" fill="#bf4520" stroke="#bf4520" stroke-width="1" fill-opacity="0.08"/>
+        <rect x="352" y="48" width="48" height="12" rx="2" fill="none" stroke="#bf4520" stroke-width="0.8" stroke-opacity="0.50"/>
+        <text x="376" y="57" fill="#bf4520" font-size="7" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.08em">CIFRADO</text>
+        <text x="432" y="78" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', system-ui, sans-serif" text-anchor="middle">Secret cifrado</text>
+        <text x="432" y="94" fill="#4f5d75" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">en git, público</text>
+        <rect x="648" y="40" width="176" height="64" rx="6" fill="#f5f5f5"/>
+        <rect x="648" y="40" width="176" height="64" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+        <rect x="656" y="48" width="28" height="12" rx="2" fill="none" stroke="#2d3142" stroke-width="0.8" stroke-opacity="0.40"/>
+        <text x="670" y="57" fill="#2d3142" font-size="7" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.08em">K8S</text>
+        <text x="736" y="78" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', system-ui, sans-serif" text-anchor="middle">Secret en el clúster</text>
+        <text x="736" y="94" fill="#4f5d75" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">flux-system/sops-age</text>
+        <text x="40" y="152" fill="#4f5d75" font-size="14" font-style="italic" font-family="'Instrument Serif', Georgia, serif">Se cifra con la clave pública (.sops.yaml); solo descifra la privada, que tienen tu portátil y Flux.</text>
+      </svg>

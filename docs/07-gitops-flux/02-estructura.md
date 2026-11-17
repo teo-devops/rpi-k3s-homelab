@@ -30,12 +30,11 @@ Algunas cosas solo se pueden aplicar cuando otras existen. El pool de IPs de Cil
 (`CiliumLoadBalancerIPPool`) es un tipo de recurso que **crea Cilium**: si Flux intentara aplicarlo antes de
 que Cilium esté instalado, fallaría. Por eso hay capas encadenadas con `dependsOn`:
 
-```mermaid
-flowchart LR
-  FS[flux-system<br/>Flux y la conexión a Git] --> IC[infra-controllers<br/>Cilium, Headlamp]
-  IC -->|dependsOn| CF[infra-configs<br/>pool de IPs, anuncios L2]
-  CF -->|dependsOn| AP[apps<br/>tus servicios]
-```
+<p align="center">
+  <img src="../img/capas-flux.svg" alt="flux-system, infra-controllers, infra-configs y apps, en ese orden con dependsOn" width="984">
+</p>
+
+<sub>Fuente editable: [docs/diagramas/capas-flux.html](../diagramas/capas-flux.html).</sub>
 
 Con `wait: true`, una capa no se da por buena hasta que todo lo que aplicó está sano (pods arrancados,
 HelmRelease instaladas). Solo entonces empieza la siguiente.

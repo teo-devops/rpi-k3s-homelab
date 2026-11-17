@@ -17,12 +17,11 @@ tres problemas:
 el repo. Un agente dentro del clúster (Flux) lo compara continuamente con el estado real y corrige las
 diferencias.
 
-```mermaid
-flowchart LR
-  T[Tú] -->|git push| G[(GitHub<br/>kubernetes/)]
-  F[Flux en el clúster] -->|lee cada minuto| G
-  F -->|aplica y corrige| C[Clúster]
-```
+<p align="center">
+  <img src="../img/gitops.svg" alt="Tú haces push a GitHub; Flux lee el repo cada minuto y aplica y corrige el clúster" width="992">
+</p>
+
+<sub>Fuente editable: [docs/diagramas/gitops.html](../diagramas/gitops.html).</sub>
 
 | Antes | Con GitOps |
 |-------|------------|

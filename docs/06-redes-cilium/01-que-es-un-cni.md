@@ -29,12 +29,11 @@ Además del CNI hacen falta otras tres piezas de red. En este lab, Cilium las cu
 
 Un pod en `rpi4-2g` (IP `10.42.2.15`) llama a otro en `rpi5-8g` (IP `10.42.0.30`):
 
-```mermaid
-flowchart LR
-  A[pod A<br/>10.42.2.15] -->|eBPF en rpi4-2g:<br/>¿a qué nodo va 10.42.0.0/24?| N1[eth0 rpi4-2g]
-  N1 -->|switch, sin encapsular| N2[eth0 rpi5-8g]
-  N2 -->|eBPF en rpi5-8g:<br/>entregar al pod| B[pod B<br/>10.42.0.30]
-```
+<p align="center">
+  <img src="../img/paquete.svg" alt="Un paquete de un pod en rpi4-2g a otro en rpi5-8g: eBPF elige el nodo, cruza el switch sin encapsular y eBPF lo entrega" width="936">
+</p>
+
+<sub>Fuente editable: [docs/diagramas/paquete.html](../diagramas/paquete.html).</sub>
 
 Cada nodo tiene su trozo del rango de pods (`10.42.0.0/24`, `10.42.1.0/24`...) y una ruta a los trozos de
 los demás. Como los tres nodos están en el mismo switch, el paquete viaja tal cual: es el **enrutado

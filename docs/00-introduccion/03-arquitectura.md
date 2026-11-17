@@ -17,30 +17,11 @@ elegir dónde ejecutarse. Ver [presupuesto de memoria](../01-hardware/03-presupu
 
 ## Capas
 
-```mermaid
-flowchart TB
-  subgraph apps["Aplicaciones"]
-    A1[Tus servicios]
-  end
-  subgraph plat["Plataforma (Flux las instala desde Git)"]
-    P1[Traefik + cert-manager]
-    P2[Prometheus + Grafana]
-    P3[cloudflared + Tailscale]
-    P4[Headlamp]
-  end
-  subgraph k8s["Kubernetes"]
-    K1[K3s: 1 server + 2 agents]
-    K2[Cilium: red, LoadBalancer, Hubble]
-    K3[local-path: volúmenes]
-  end
-  subgraph os["Sistema operativo (Ansible)"]
-    O1[Raspberry Pi OS Lite 64 bits]
-  end
-  subgraph hw["Hardware"]
-    H1[Pi 5 8 GB] --- H2[Pi 5 4 GB] --- H3[Pi 4 2 GB]
-  end
-  apps --> plat --> k8s --> os --> hw
-```
+<p align="center">
+  <img src="../img/capas.svg" alt="Las cinco capas del homelab, del hardware a las aplicaciones, y quién instala cada una" width="888">
+</p>
+
+<sub>Fuente editable: [docs/diagramas/capas.html](../diagramas/capas.html).</sub>
 
 Cada capa tiene su herramienta y su tema en la guía:
 
@@ -55,27 +36,11 @@ Cada capa tiene su herramienta y su tema en la guía:
 
 Hay tres caminos, y cada uno tiene un propósito distinto:
 
-```mermaid
-flowchart LR
-  subgraph internet["Internet"]
-    U[Visitante]
-    Y[Tú, fuera de casa]
-  end
-  subgraph cf["Cloudflare"]
-    CF[Edge + Tunnel]
-  end
-  subgraph casa["Red de casa"]
-    R[Router<br/>sin puertos abiertos]
-    T[Traefik<br/>IP de LoadBalancer]
-    S[Servicios]
-    CD[cloudflared]
-    TS[Tailscale]
-    L[Tu portátil en casa]
-  end
-  U -->|HTTPS público| CF -->|túnel saliente| CD --> S
-  Y -->|VPN| TS --> T
-  L -->|*.home.example.com| T --> S
-```
+<p align="center">
+  <img src="../img/arquitectura.svg" alt="Los tres caminos del tráfico hasta Traefik y qué corre en cada Raspberry Pi" width="888">
+</p>
+
+<sub>Fuente editable: [docs/diagramas/arquitectura.html](../diagramas/arquitectura.html).</sub>
 
 1. **Desde casa**: el DNS local resuelve `*.home.example.com` a la IP de Traefik. Certificado válido de
    Let's Encrypt obtenido por DNS-01, sin exponer nada.
