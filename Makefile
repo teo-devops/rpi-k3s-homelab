@@ -19,8 +19,9 @@ export KUBECONFIG := $(HOME)/.kube/rpi-k3s-homelab.yaml
 # Fase 3. Clave privada de SOPS: fuera del repo.
 export SOPS_AGE_KEY_FILE := $(HOME)/.config/sops/age/rpi-k3s-homelab.agekey
 FILE ?=
-# Sin Ansible instalado (p. ej. en el CI) se usa el de uvx.
-ANSIBLE_GALAXY := $(if $(shell command -v ansible-galaxy),ansible-galaxy,uvx --from ansible-core ansible-galaxy)
+# El mismo Ansible aislado (uvx) que usa ansible-lint: así ve las colecciones que instala,
+# aunque el sistema traiga otro Ansible con las suyas (pasa en los runners de GitHub).
+ANSIBLE_GALAXY := uvx --from ansible-core ansible-galaxy
 ANSIBLE_ARGS := $(if $(TAGS),--tags $(TAGS)) $(if $(LIMIT),--limit $(LIMIT))
 
 .DEFAULT_GOAL := help
@@ -48,7 +49,7 @@ check: ## Comprueba las herramientas de tu portátil
 
 .PHONY: deps
 deps: ## Instala las colecciones de Ansible necesarias
-	cd $(ANSIBLE_DIR) && $(ANSIBLE_GALAXY) collection install -r requirements.yml -p ~/.ansible/collections
+	cd $(ANSIBLE_DIR) && $(ANSIBLE_GALAXY) collection install -r requirements.yml
 
 .PHONY: ping
 ping: ## Comprueba que Ansible llega a todos los nodos por SSH
