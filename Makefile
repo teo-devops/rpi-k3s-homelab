@@ -140,5 +140,12 @@ lint: ## Pasa yamllint, ansible-lint y shellcheck
 docs-check: ## Busca enlaces internos rotos en la documentación
 	@./scripts/check-docs-links.sh
 
+.PHONY: k8s-check
+k8s-check: ## Construye y valida kubernetes/ sin clúster (kustomize + kubeconform)
+	@./scripts/check-kubernetes.sh
+
+.PHONY: ci
+ci: lint docs-check k8s-check ## Todo lo que comprueba el CI de GitHub
+
 ## ---------- Fases siguientes (ver docs/README.md) ----------
 # backup:     Velero (fase 4)

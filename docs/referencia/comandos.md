@@ -28,6 +28,8 @@
 | `make headlamp` | Interfaz web con token de solo lectura |
 | `make lint` | yamllint, ansible-lint, shellcheck |
 | `make docs-check` | Enlaces rotos en la documentación |
+| `make k8s-check` | Construye y valida `kubernetes/` sin clúster (kustomize + kubeconform) |
+| `make ci` | Todo lo anterior: lo mismo que el CI de GitHub |
 
 ## Ansible a mano (desde `ansible/`)
 
