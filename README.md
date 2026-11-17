@@ -22,29 +22,11 @@ Detalle y lista de material: [docs/01-hardware](docs/01-hardware/README.md).
 
 ## Arquitectura
 
-```mermaid
-flowchart LR
-  subgraph casa["Red de casa"]
-    subgraph l["rpi5-8g · large"]
-      CP[K3s server<br/>SQLite]
-      MON[Prometheus · Grafana]
-      FX[Flux · Headlamp · Hubble]
-    end
-    subgraph m["rpi5-4g · medium"]
-      TR[Traefik]
-      CM[cert-manager]
-      AP[Apps]
-    end
-    subgraph s["rpi4-2g · small"]
-      CF[cloudflared]
-      LT[Cargas ligeras]
-    end
-    CIL{{Cilium en todos los nodos:<br/>red eBPF · LoadBalancer L2 · NetworkPolicy}}
-  end
-  Internet((Internet)) -->|Cloudflare Tunnel<br/>sin puertos abiertos| CF
-  Admin((Tú fuera de casa)) -->|Tailscale| TR
-  LAN((Casa)) -->|*.home.dominio| TR
-```
+<p align="center">
+  <img src="docs/img/arquitectura.svg" alt="Arquitectura del homelab: qué corre en cada Raspberry Pi, cómo llega el tráfico hasta Traefik y cómo Flux aplica el repo en el clúster" width="888">
+</p>
+
+Fuente editable: [docs/diagramas/arquitectura.html](docs/diagramas/arquitectura.html).
 
 | Capa | Herramienta | Por qué |
 |------|-------------|---------|
